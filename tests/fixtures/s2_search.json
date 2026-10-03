@@ -1,0 +1,5 @@
+{"total": 1, "data": [
+ {"paperId": "abc123", "title": "Deep learning stroke outcome", "year": 2023,
+  "externalIds": {"DOI": "10.1000/S003", "ArXiv": "2301.00001", "PubMed": "37000000"},
+  "abstract": "DL works.", "authors": [{"name": "C. Kim"}], "venue": "arXiv", "url": "https://www.semanticscholar.org/paper/abc123"}
+]}

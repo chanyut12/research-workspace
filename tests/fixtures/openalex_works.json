@@ -1,0 +1,8 @@
+{"meta": {"count": 2}, "results": [
+ {"id": "https://openalex.org/W111", "title": "Admission NIHSS predicts outcome", "display_name": "Admission NIHSS predicts outcome",
+  "publication_year": 2019, "doi": "https://doi.org/10.1000/S001", "ids": {"pmid": "https://pubmed.ncbi.nlm.nih.gov/31234567"},
+  "abstract_inverted_index": {"NIHSS": [0], "predicts": [1], "outcome": [2]},
+  "authorships": [{"author": {"display_name": "Ann Author"}}], "primary_location": {"source": {"display_name": "Stroke"}}},
+ {"id": "https://openalex.org/W222", "title": null, "display_name": "Glucose and stroke", "publication_year": 2021, "doi": null,
+  "ids": {}, "abstract_inverted_index": null, "authorships": [], "primary_location": null}
+]}

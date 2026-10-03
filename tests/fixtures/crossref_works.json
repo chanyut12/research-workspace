@@ -1,0 +1,5 @@
+{"status": "ok", "message": {"items": [
+ {"DOI": "10.1000/S002", "title": ["Machine learning for 90-day outcome after stroke"], "issued": {"date-parts": [[2022, 3]]},
+  "author": [{"given": "Bo", "family": "Lee"}], "container-title": ["J Stroke"], "abstract": "<jats:p>We trained models.</jats:p>",
+  "URL": "https://doi.org/10.1000/s002"}
+]}}
