@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "record",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "year",
+    "doi",
+    "identifiers",
+    "sources",
+    "query_ids"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^S-\\d{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "doi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "identifiers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "openalex",
+          "crossref",
+          "semantic_scholar"
+        ]
+      },
+      "minItems": 1
+    },
+    "query_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^Q-\\d{3,}$"
+      },
+      "minItems": 1
+    },
+    "abstract": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "venue": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

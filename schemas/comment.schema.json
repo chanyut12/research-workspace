@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "comment",
+  "type": "object",
+  "required": [
+    "id",
+    "meeting_id",
+    "target",
+    "text",
+    "severity",
+    "status",
+    "resolution",
+    "changed_ids",
+    "deferred_until",
+    "source_ref",
+    "confirmed_by_user",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^K-\\d{3,}$"
+    },
+    "meeting_id": {
+      "type": "string",
+      "pattern": "^M-\\d{3,}$"
+    },
+    "target": {
+      "type": "string",
+      "pattern": "^(((H|X|R|C)-\\d{3,})|general)$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "enum": [
+        "must",
+        "should",
+        "consider"
+      ]
+    },
+    "status": {
+      "enum": [
+        "open",
+        "addressed",
+        "declined",
+        "deferred"
+      ]
+    },
+    "resolution": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "changed_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deferred_until": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_ref": {
+      "type": "string"
+    },
+    "confirmed_by_user": {
+      "type": "boolean"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "addressed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "changed_ids": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "declined"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "deferred"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "deferred_until": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

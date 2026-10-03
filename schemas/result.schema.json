@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "result",
+  "type": "object",
+  "required": [
+    "id",
+    "experiment_id",
+    "run_id",
+    "metric",
+    "value",
+    "ci",
+    "split",
+    "summary"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^R-\\d{3,}$"
+    },
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^X-\\d{3,}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^RUN-\\d{3,}$"
+    },
+    "metric": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {
+      "type": "number"
+    },
+    "ci": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "split": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string"
+    }
+  }
+}

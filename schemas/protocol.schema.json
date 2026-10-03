@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "protocol",
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "title",
+    "research_questions",
+    "review_type",
+    "eligibility",
+    "sources",
+    "date_range"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RQ-\\d+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "review_type": {
+      "enum": [
+        "scoping",
+        "systematic",
+        "narrative",
+        "rapid"
+      ]
+    },
+    "eligibility": {
+      "type": "object",
+      "required": [
+        "include",
+        "exclude"
+      ],
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "openalex",
+          "crossref",
+          "semantic_scholar"
+        ]
+      },
+      "minItems": 1
+    },
+    "date_range": {
+      "type": "object",
+      "required": [
+        "from_year",
+        "to_year"
+      ],
+      "properties": {
+        "from_year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

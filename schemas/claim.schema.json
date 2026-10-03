@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "claim",
+  "type": "object",
+  "required": [
+    "id",
+    "text",
+    "cites",
+    "support_level"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^C-\\d{3,}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cites": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(E|O|R)-\\d{3,}$"
+      },
+      "minItems": 1
+    },
+    "support_level": {
+      "enum": [
+        "literature",
+        "experimental",
+        "expert-opinion",
+        "mixed"
+      ]
+    },
+    "section": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

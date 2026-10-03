@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "screening_row",
+  "type": "object",
+  "required": [
+    "id",
+    "stage",
+    "decision",
+    "reason_code",
+    "confidence",
+    "reviewer",
+    "timestamp",
+    "protocol_version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^S-\\d{3,}$"
+    },
+    "stage": {
+      "enum": [
+        "title-abstract",
+        "full-text"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "include",
+        "exclude",
+        "needs-human",
+        "awaiting-retrieval"
+      ]
+    },
+    "reason_code": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string",
+      "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$"
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "protocol_version": {
+      "type": "string",
+      "pattern": "^\\d+$"
+    }
+  }
+}

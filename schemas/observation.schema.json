@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "observation",
+  "type": "object",
+  "required": [
+    "id",
+    "meeting_id",
+    "speaker_role",
+    "statement",
+    "form",
+    "basis",
+    "source_ref",
+    "confirmed_by_user",
+    "recorded_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^O-\\d{3,}$"
+    },
+    "meeting_id": {
+      "type": "string",
+      "pattern": "^M-\\d{3,}$"
+    },
+    "speaker_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "form": {
+      "enum": [
+        "verbatim",
+        "paraphrase"
+      ]
+    },
+    "basis": {
+      "enum": [
+        "clinical-experience",
+        "domain-rule",
+        "anecdote",
+        "data-impression"
+      ]
+    },
+    "source_ref": {
+      "type": "string"
+    },
+    "confirmed_by_user": {
+      "type": "boolean"
+    },
+    "recorded_at": {
+      "type": "string"
+    }
+  }
+}

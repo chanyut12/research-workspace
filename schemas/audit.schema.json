@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "audit",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "automated_issues",
+    "claim_reviews"
+  ],
+  "properties": {
+    "generated_at": {
+      "type": "string"
+    },
+    "automated_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "blocking",
+              "warning"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "claim_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "verdict"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^C-\\d{3,}$"
+          },
+          "verdict": {
+            "enum": [
+              "PASS",
+              "WEAKEN",
+              "MISMATCH",
+              "NOT_FOUND",
+              "HUMAN_REVIEW"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewed_at": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "state",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "title",
+    "stage",
+    "protocol_version",
+    "gates"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "enum": [
+        "INIT",
+        "SCOPED",
+        "PROTOCOL_APPROVED",
+        "LITERATURE",
+        "SYNTHESIZED",
+        "HYPOTHESES_APPROVED",
+        "EXPERIMENTING",
+        "RESULTS_VALIDATED",
+        "WRITING",
+        "AUDITED",
+        "RELEASED"
+      ]
+    },
+    "protocol_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "G1",
+        "G2",
+        "G3",
+        "G4"
+      ],
+      "properties": {
+        "G1": {
+          "type": "object",
+          "required": [
+            "approved",
+            "approved_ids"
+          ],
+          "properties": {
+            "approved": {
+              "type": "boolean"
+            },
+            "approved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "G2": {
+          "type": "object",
+          "required": [
+            "approved",
+            "approved_ids"
+          ],
+          "properties": {
+            "approved": {
+              "type": "boolean"
+            },
+            "approved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "G3": {
+          "type": "object",
+          "required": [
+            "approved",
+            "approved_ids"
+          ],
+          "properties": {
+            "approved": {
+              "type": "boolean"
+            },
+            "approved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "G4": {
+          "type": "object",
+          "required": [
+            "approved",
+            "approved_ids"
+          ],
+          "properties": {
+            "approved": {
+              "type": "boolean"
+            },
+            "approved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

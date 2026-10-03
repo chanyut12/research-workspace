@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "search_log_row",
+  "type": "object",
+  "required": [
+    "query_id",
+    "purpose",
+    "for_id",
+    "source",
+    "query",
+    "filters",
+    "timestamp",
+    "count",
+    "raw_file",
+    "status"
+  ],
+  "properties": {
+    "query_id": {
+      "type": "string",
+      "pattern": "^Q-\\d{3,}$"
+    },
+    "purpose": {
+      "enum": [
+        "scoping",
+        "supporting",
+        "contradicting",
+        "both"
+      ]
+    },
+    "for_id": {
+      "type": "string",
+      "pattern": "^((RQ-\\d+)|(H-\\d{3,}))?$"
+    },
+    "source": {
+      "enum": [
+        "openalex",
+        "crossref",
+        "semantic_scholar"
+      ]
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1
+    },
+    "filters": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "count": {
+      "type": "string",
+      "pattern": "^\\d+$"
+    },
+    "raw_file": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "error"
+      ]
+    }
+  }
+}

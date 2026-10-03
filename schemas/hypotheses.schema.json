@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "hypotheses",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "hypotheses"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "rq_id",
+          "statement",
+          "origin",
+          "based_on",
+          "literature_checks",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^H-\\d{3,}$"
+          },
+          "rq_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^RQ-\\d+$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "origin": {
+            "enum": [
+              "literature",
+              "expert",
+              "advisor",
+              "data-exploration"
+            ]
+          },
+          "based_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(E|O|R)-\\d{3,}$"
+            },
+            "minItems": 1
+          },
+          "literature_checks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^Q-\\d{3,}$"
+            }
+          },
+          "status": {
+            "enum": [
+              "proposed",
+              "approved",
+              "rejected",
+              "tested"
+            ]
+          },
+          "rationale": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "run",
+  "type": "object",
+  "required": [
+    "run_id",
+    "experiment_id",
+    "started_at",
+    "status",
+    "code_commit",
+    "environment",
+    "params",
+    "metrics"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^RUN-\\d{3,}$"
+    },
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^X-\\d{3,}$"
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "failed",
+        "aborted"
+      ]
+    },
+    "code_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "environment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "params": {
+      "type": "object"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "evidence",
+  "type": "object",
+  "required": [
+    "id",
+    "study_id",
+    "rq_id",
+    "claim",
+    "source_location",
+    "evidence_type",
+    "extractor_confidence",
+    "verification_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^E-\\d{3,}$"
+    },
+    "study_id": {
+      "type": "string",
+      "pattern": "^S-\\d{3,}$"
+    },
+    "rq_id": {
+      "type": "string",
+      "pattern": "^RQ-\\d+$"
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_location": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "table": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "figure": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "page"
+          ],
+          "properties": {
+            "page": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "required": [
+            "section"
+          ],
+          "properties": {
+            "section": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "table"
+          ],
+          "properties": {
+            "table": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "figure"
+          ],
+          "properties": {
+            "figure": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "evidence_type": {
+      "enum": [
+        "reported_result",
+        "author_interpretation",
+        "extractor_inference"
+      ]
+    },
+    "population_or_dataset": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "method": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outcome": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "effect_or_result": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "extractor_confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "verification_status": {
+      "enum": [
+        "pending",
+        "verified",
+        "weaken",
+        "rejected",
+        "human-review"
+      ]
+    },
+    "verification_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
