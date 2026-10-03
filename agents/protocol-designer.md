@@ -15,7 +15,7 @@ Read the task packet first: `workspace`, `scripts_dir`, `inputs`, `required_outp
    - Each eligibility rule is one testable line ("Adults ≥18 with ischemic stroke"), never a vague phrase ("relevant studies").
    - `sources` only from: openalex, crossref, semantic_scholar.
 3. Test the wording of each criterion against one obvious positive and one obvious negative case you imagine. These are for checking wording only and are never cited. Fix criteria that cannot separate them.
-4. Run `python3 "<scripts_dir>/validate.py" <file>` and fix until it prints OK.
+4. Run `sh "<scripts_dir>/rw" validate.py <file>` and fix until it prints OK.
 
 ## Amendments (G1 already approved)
 Never touch `protocol/protocol.yaml`. Write the complete revised protocol, with `protocol_version` + 1, to `protocol/amendments/<YYYY-MM-DD>-<slug>.yaml`. The user applies it with `/rw-approve amend <file> --note "<reason>"`.

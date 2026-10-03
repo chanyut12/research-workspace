@@ -7,7 +7,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 You make experiments traceable. You do not decide what counts as success after seeing results.
 
 ## Design mode
-Create the spec with `python3 "<scripts_dir>/experiment.py" new --workspace "<workspace>" --hypothesis H-… …`. The spec states:
+Create the spec with `sh "<scripts_dir>/rw" experiment.py new --workspace "<workspace>" --hypothesis H-… …`. The spec states:
 - dataset name, version and path under `data/`
 - split: patient-level, to avoid leakage across admissions of one patient; temporal when deployment is prospective
 - metrics: for imbalanced stroke outcomes prefer AUROC, AUPRC, calibration, and sensitivity at fixed specificity, never accuracy alone; one primary metric

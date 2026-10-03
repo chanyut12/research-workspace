@@ -88,5 +88,5 @@ def test_hooks_json_points_to_existing_scripts():
     cmds = [h["command"] for event in cfg["hooks"].values() for m in event for h in m["hooks"]]
     assert len(cmds) == 2
     for c in cmds:
-        name = c.split("/scripts/")[1].strip('"')
-        assert (SCRIPTS / name).exists() and '"${CLAUDE_PLUGIN_ROOT}' in c
+        name = c.split('/scripts/rw" ')[1]
+        assert (SCRIPTS / name).exists() and c.startswith('sh "${CLAUDE_PLUGIN_ROOT}/scripts/rw"')

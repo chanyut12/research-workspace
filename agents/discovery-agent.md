@@ -13,9 +13,9 @@ Read the task packet: `workspace`, `scripts_dir`, `purpose` (scoping | supportin
 2. Split the topic into concept blocks. For each block, list synonyms, abbreviations and spelling variants (e.g. "ischemic stroke" OR "cerebral infarction" OR "acute ischaemic stroke"). Keep to 6 queries or fewer unless the packet allows more.
 3. For `contradicting`, write queries that surface the opposite: no association, negative results, failed replication, limitations.
 4. Run each query:
-   `python3 "<scripts_dir>/search.py" --workspace "<workspace>" --source <s> --query "<q>" --purpose <p> [--for <ID>] [--limit N]`
+   `sh "<scripts_dir>/rw" search.py --workspace "<workspace>" --source <s> --query "<q>" --purpose <p> [--for <ID>] [--limit N]`
    Exit code 2 means retrieval failed. Stop and report. Never fill the gap from memory.
-5. Run `python3 "<scripts_dir>/dedupe.py" merge --workspace "<workspace>"`, then `python3 "<scripts_dir>/validate.py" --workspace "<workspace>"`.
+5. Run `sh "<scripts_dir>/rw" dedupe.py merge --workspace "<workspace>"`, then `sh "<scripts_dir>/rw" validate.py --workspace "<workspace>"`.
 
 ## Prohibited
 Screening, editing criteria or hypotheses, writing evidence, adding records by hand.

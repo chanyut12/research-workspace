@@ -1,0 +1,12 @@
+#!/bin/sh
+# Run a research-workbench script with a Python that has pyyaml + jsonschema, whatever venv is active.
+# Order: $RW_PYTHON, ~/.research-workbench/venv, the plugin's own .venv, then python3 on PATH.
+DIR=$(cd "$(dirname "$0")" && pwd)
+SCRIPT="$1"
+shift
+for py in "$RW_PYTHON" "$HOME/.research-workbench/venv/bin/python" "$DIR/../.venv/bin/python"; do
+  if [ -n "$py" ] && [ -x "$py" ] && "$py" -c "import yaml, jsonschema" >/dev/null 2>&1; then
+    exec "$py" "$DIR/$SCRIPT" "$@"
+  fi
+done
+exec python3 "$DIR/$SCRIPT" "$@"

@@ -10,13 +10,13 @@ argument-hint: "new | prep M-nnn | log M-nnn"
 
 ## new
 Ask for the type (expert-consult, advisor-review or self-note), the date, and the participant roles (e.g. clinician, advisor; names optional). Then run:
-`python3 "$S/meeting.py" new --type <type> --date <YYYY-MM-DD> --role <role> [--role …] [--agenda "…"]`
-Tell the user where `notes.md` is. If they have a transcript, run `python3 "$S/meeting.py" attach-transcript M-… <file>`.
+`sh "$S/rw" meeting.py new --type <type> --date <YYYY-MM-DD> --role <role> [--role …] [--agenda "…"]`
+Tell the user where `notes.md` is. If they have a transcript, run `sh "$S/rw" meeting.py attach-transcript M-… <file>`.
 
 ## prep M-nnn
-1. Read `python3 "$S/rw_state.py" status`, `python3 "$S/trace.py"`, `python3 "$S/comments.py" summary`, the hypotheses and the latest results.
+1. Read `sh "$S/rw" rw_state.py status`, `sh "$S/rw" trace.py`, `sh "$S/rw" comments.py summary`, the hypotheses and the latest results.
 2. Draft 5–10 questions using `references/prep-questions.md` for the meeting type. Each question names the H/X/R/K it is about.
-3. Edit the questions with the user, then run `python3 "$S/meeting.py" prep M-… --question "…" [--question "…"]`.
+3. Edit the questions with the user, then run `sh "$S/rw" meeting.py prep M-… --question "…" [--question "…"]`.
 4. For an advisor review, also run `/rw-progress`.
 
 ## log M-nnn
@@ -28,7 +28,7 @@ Tell the user where `notes.md` is. If they have a transcript, run `python3 "$S/m
    - If it is unclear who said something or what it means, ask. Do not guess.
 4. The user confirms, edits or drops each row. Write nothing before that.
 5. For each confirmed row:
-   - `python3 "$S/meeting.py" add-observation M-… --role … --statement "…" --form … --basis … --ref …`
-   - `python3 "$S/meeting.py" add-comment M-… --target … --text "…" --severity … --ref …`
+   - `sh "$S/rw" meeting.py add-observation M-… --role … --statement "…" --form … --basis … --ref …`
+   - `sh "$S/rw" meeting.py add-comment M-… --target … --text "…" --severity … --ref …`
 6. For each new O that could be tested on the data, offer a draft hypothesis (origin expert or advisor). If the user agrees, dispatch synthesis-agent to add it as proposed, then run a literature check with `/rw-search H-… both`.
-7. Run `python3 "$S/meeting.py" logged M-…` and `python3 "$S/trace.py"`. Report the new O/K/H IDs.
+7. Run `sh "$S/rw" meeting.py logged M-…` and `sh "$S/rw" trace.py`. Report the new O/K/H IDs.

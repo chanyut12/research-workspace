@@ -10,9 +10,9 @@ Scripts: `$S` = `${CLAUDE_SKILL_DIR}/../../scripts` (quote all paths).
 
 ## 1. Read the state
 ```
-python3 "$S/rw_state.py" status
-python3 "$S/trace.py"
-python3 "$S/comments.py" summary
+sh "$S/rw" rw_state.py status
+sh "$S/rw" trace.py
+sh "$S/rw" comments.py summary
 ```
 Tell the user, in Thai and in 10 lines or fewer:
 - the stage and what blocks the next stage
@@ -33,7 +33,7 @@ Tell the user, in Thai and in 10 lines or fewer:
 | AUDITED | the user runs `/rw-approve G4` |
 
 Meetings are events, not stages: use `/rw-meeting` and `/rw-progress` at any time.
-Address open `must` comments before starting new work, and close each one with `python3 "$S/comments.py" resolve K-… --status … --changed …`.
+Address open `must` comments before starting new work, and close each one with `sh "$S/rw" comments.py resolve K-… --status … --changed …`.
 
 ## 3. Dispatch a specialist
 Every agent gets a task packet in its prompt:
@@ -52,23 +52,23 @@ Run independent tasks in parallel: one discovery-agent per source, evidence-anal
 Never give one agent planning, retrieval, synthesis and audit together.
 
 ## 4. Check what came back
-After each agent returns, run `python3 "$S/validate.py"` and `python3 "$S/trace.py"`.
+After each agent returns, run `sh "$S/rw" validate.py` and `sh "$S/rw" trace.py`.
 - On errors, send them back to the agent that owns the artifact, once.
 - If they are still there after that, tell the user.
 - Never silently fix a specialist's artifact yourself.
 
 ## 5. Move the stage
 When `rw_state.py status` shows the next stage is ready, run:
-`python3 "$S/rw_state.py" advance <STAGE> --reason "<why>"`
+`sh "$S/rw" rw_state.py advance <STAGE> --reason "<why>"`
 
 To go back (for example, an advisor comment needs more literature):
-`python3 "$S/rw_state.py" advance <EARLIER_STAGE> --reason "<why>" --cause K-…`
+`sh "$S/rw" rw_state.py advance <EARLIER_STAGE> --reason "<why>" --cause K-…`
 
 Never run `rw_state.py approve`. Gates belong to the user: `/rw-approve`.
 
 ## Writing (stage WRITING)
-1. Create claims only with `python3 "$S/claims.py" add --text "…" --cites E-…,R-… --section …`.
-2. Write `report/report.md` from `python3 "$S/claims.py" list`. Every factual sentence carries its `[C-xxx]`.
+1. Create claims only with `sh "$S/rw" claims.py add --text "…" --cites E-…,R-… --section …`.
+2. Write `report/report.md` from `sh "$S/rw" claims.py list`. Every factual sentence carries its `[C-xxx]`.
    - Phrase `expert-opinion` claims as opinion ("ผู้เชี่ยวชาญให้ความเห็นว่า…").
    - Phrase `literature` claims at the strength of the study design.
 3. If a sentence you need has no evidence, do not write it. Tell the user `BLOCKED_BY_EVIDENCE: <what is missing>`.

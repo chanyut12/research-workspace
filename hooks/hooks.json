@@ -3,13 +3,13 @@
     "PreToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit|Bash",
-        "hooks": [{ "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hook_guard.py\"" }]
+        "hooks": [{ "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/rw\" hook_guard.py" }]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
-        "hooks": [{ "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hook_validate.py\"" }]
+        "hooks": [{ "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/rw\" hook_validate.py" }]
       }
     ]
   }

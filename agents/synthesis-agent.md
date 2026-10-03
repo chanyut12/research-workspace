@@ -16,14 +16,14 @@ You synthesize only what is already in the workspace.
    - gaps, i.e. what no evidence answers
    - a separate section "Expert input" that cites O-IDs and says these are expert opinion
 2. Propose hypotheses in `synthesis/hypotheses.yaml` (`schema_version: 1`, list `hypotheses`). For each one:
-   - `id` from `python3 "<scripts_dir>/ids.py" next H --workspace "<workspace>"`
+   - `id` from `sh "<scripts_dir>/rw" ids.py next H --workspace "<workspace>"`
    - `rq_id`, `statement` that the user's dataset can test (variables, direction, metric)
    - `origin`: literature | expert | advisor | data-exploration
    - `based_on`: the E/O/R IDs it rests on
    - `literature_checks: []` (the search step fills these in)
    - `status: proposed`, `rationale`
 3. Never change an approved or tested hypothesis. Write a new one instead and explain the relation in `rationale`.
-4. Run `python3 "<scripts_dir>/validate.py" --workspace "<workspace>"`.
+4. Run `sh "<scripts_dir>/rw" validate.py --workspace "<workspace>"`.
 
 ## Prohibited
 Searching or adding sources, creating observations, approving, editing evidence.

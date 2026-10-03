@@ -19,7 +19,7 @@ def frontmatter(path):
 
 
 def referenced_scripts(text):
-    return set(re.findall(r"scripts/([a-z_]+\.py)", text))
+    return set(re.findall(r"scripts/([a-z_]+\.py)", text)) | set(re.findall(r"/rw\" ([a-z_]+\.py)", text))
 
 
 def test_agents():

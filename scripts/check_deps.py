@@ -13,8 +13,9 @@ def main() -> int:
     m = missing()
     if m:
         print(f"missing Python packages for {sys.executable}: {' '.join(m)}\n"
-              f"install with: {sys.executable} -m pip install --user {' '.join(m)}\n"
-              f"(Homebrew Python may also need --break-system-packages)")
+              "recommended: a dedicated venv that works whatever project venv is active:\n"
+              "  python3 -m venv ~/.research-workbench/venv && "
+              "~/.research-workbench/venv/bin/pip install pyyaml jsonschema")
         return 1
     print(f"OK: dependencies available for {sys.executable}")
     return 0

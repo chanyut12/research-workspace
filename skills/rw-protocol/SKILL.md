@@ -7,7 +7,7 @@ description: Draft or amend the research protocol (research questions, scope, el
 
 `$S` = `${CLAUDE_SKILL_DIR}/../../scripts`
 
-1. Run `python3 "$S/rw_state.py" status`.
+1. Run `sh "$S/rw" rw_state.py status`.
 2. If G1 is already approved, this is an amendment:
    - Ask the user what changes and why.
    - Dispatch protocol-designer to write `protocol/amendments/<date>-<slug>.yaml` with `protocol_version` + 1.
@@ -21,6 +21,6 @@ description: Draft or amend the research protocol (research questions, scope, el
 
    Use PICO/PICOTS for prediction questions and PCC for scoping questions.
 4. Dispatch protocol-designer (see `/rw-orchestrate` for the task packet) with the answers.
-5. Run `python3 "$S/validate.py"`. Show the protocol to the user as a short Thai summary.
-6. Run `python3 "$S/rw_state.py" advance SCOPED --reason "protocol drafted"`.
+5. Run `sh "$S/rw" validate.py`. Show the protocol to the user as a short Thai summary.
+6. Run `sh "$S/rw" rw_state.py advance SCOPED --reason "protocol drafted"`.
 7. Ask the user to review the protocol and run `/rw-approve G1`.

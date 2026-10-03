@@ -6,11 +6,12 @@ Claude Code plugin ที่ให้ AI ช่วยทำงานวิจั
 
 ## ติดตั้ง
 
-1. Python ≥ 3.10 ที่คำสั่ง `python3` ใช้ต้องมี `pyyaml` และ `jsonschema`
+1. สร้าง Python env เฉพาะของ tool (Python ≥ 3.10) ครั้งเดียว
    ```bash
-   python3 -m pip install --user pyyaml jsonschema   # Homebrew Python อาจต้องเติม --break-system-packages
+   python3 -m venv ~/.research-workbench/venv && ~/.research-workbench/venv/bin/pip install pyyaml jsonschema
    ```
-   `/rw-init` จะเช็กให้อีกครั้ง ถ้าไม่มี package สองตัวนี้ hook ตรวจ artifact จะถูกข้ามแบบเงียบ ๆ
+   scripts ทุกตัวรันผ่าน `scripts/rw` ซึ่งเลือก Python ตามลำดับ `$RW_PYTHON` → `~/.research-workbench/venv` → `.venv` ของ plugin → `python3`
+   ดังนั้นถึงจะเปิด venv ของ project อื่นอยู่ก็ยังใช้ได้ `/rw-init` จะเช็กให้อีกครั้ง ถ้าหา Python ที่มี deps ไม่เจอ hook ตรวจ artifact จะถูกข้ามแบบเงียบ ๆ
 2. ติดตั้ง plugin ใน Claude Code
    ```
    /plugin marketplace add <github-user>/research-workbench
