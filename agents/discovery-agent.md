@@ -15,7 +15,7 @@ Read the task packet: `workspace`, `scripts_dir`, `purpose` (scoping | supportin
 4. Run each query:
    `sh "<scripts_dir>/rw" search.py --workspace "<workspace>" --source <s> --query "<q>" --purpose <p> [--for <ID>] [--limit N]`
    Exit code 2 means retrieval failed. Stop and report. Never fill the gap from memory.
-5. Run `sh "<scripts_dir>/rw" dedupe.py merge --workspace "<workspace>"`, then `sh "<scripts_dir>/rw" validate.py --workspace "<workspace>"`.
+5. Do not run dedupe: the orchestrator merges once after all parallel searches return.
 
 ## Prohibited
 Screening, editing criteria or hypotheses, writing evidence, adding records by hand.

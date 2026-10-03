@@ -12,6 +12,7 @@ from dedupe import normalize_doi, normalize_title
 
 P = rw_io.PATHS
 CROSSREF_WORK = "https://api.crossref.org/works/"
+OPENALEX_WORK = "https://api.openalex.org/works/doi:"
 FLAG_TYPES = {"retraction", "partial_retraction", "withdrawal", "removal", "expression_of_concern"}
 
 
@@ -45,11 +46,26 @@ def verify_record(record, fetch=None) -> dict:
     try:
         payload = fetch(CROSSREF_WORK + urllib.parse.quote(doi, safe="/()"), params=None, headers=None)
     except net.NotFound:
-        return {**base, "status": "not-found", "detail": "Crossref has no record for this DOI"}
+        return _verify_in_openalex(record, doi, base, fetch)
     except net.RetrievalError as e:
         return {**base, "status": "error", "detail": str(e)}
     status, detail = compare(record, payload.get("message") or {})
     return {**base, "status": status, "detail": detail}
+
+
+def _verify_in_openalex(record, doi, base, fetch) -> dict:
+    """DOIs registered outside Crossref (DataCite: arXiv, Zenodo, figshare) are 404 there."""
+    try:
+        work = fetch(OPENALEX_WORK + urllib.parse.quote(doi, safe="/()"), params=None, headers=None)
+    except net.NotFound:
+        return {**base, "status": "not-found", "detail": "neither Crossref nor OpenAlex knows this DOI"}
+    except net.RetrievalError as e:
+        return {**base, "status": "error", "detail": str(e)}
+    message = {"title": [work.get("title") or work.get("display_name") or ""],
+               "issued": {"date-parts": [[work.get("publication_year")]]}}
+    status, detail = compare(record, message)
+    return {**base, "status": status,
+            "detail": "non-Crossref registrar (found in OpenAlex)" if status == "verified" else detail}
 
 
 def record_ids(ws, scope) -> list[str]:

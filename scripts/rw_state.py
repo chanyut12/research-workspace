@@ -123,10 +123,15 @@ def approve(ws, gate, ids=None, note=None) -> dict:
         if problems:
             raise GateError(problems)
         state["protocol_version"] = (rw_io.read_yaml(proto) or {}).get("protocol_version", 1)
+        state.setdefault("frozen", {})[P["protocol"]] = trace.frozen_digest(ws, P["protocol"])
     elif gate == "G2":
         if _idx(stage) < _idx("SYNTHESIZED"):
             problems.append(f"G2 needs stage SYNTHESIZED or later (current stage {stage})")
         hpath = ws / P["hypotheses"]
+        if hpath.exists():
+            problems += validate.validate_file(hpath, ws)
+            if problems:
+                raise GateError(problems)
         data = rw_io.read_yaml(hpath) or {"schema_version": 1, "hypotheses": []}
         by = {h["id"]: h for h in data["hypotheses"]}
         new_ids = list(ids) if ids else [h for h, v in by.items() if v.get("status") == "proposed"]
@@ -164,6 +169,8 @@ def approve(ws, gate, ids=None, note=None) -> dict:
             spec = rw_io.read_yaml(spath)
             spec["status"] = "approved"
             rw_io.write_yaml(spath, spec)
+            rel = f"experiments/{xid}/spec.yaml"
+            state.setdefault("frozen", {})[rel] = trace.frozen_digest(ws, rel)
         new_ids = list(ids)
     else:  # G4
         if stage != "AUDITED":
@@ -201,6 +208,7 @@ def amend_protocol(ws, amendment_file, note) -> dict:
         raise GateError(problems)
     rw_io.write_yaml(ws / P["protocol"], new)
     state["protocol_version"] = expected
+    state.setdefault("frozen", {})[P["protocol"]] = trace.frozen_digest(ws, P["protocol"])
     save_state(ws, state)
     log_decision(ws, "amend", ids=[src.relative_to(ws).as_posix()], reason=note)
     return state
@@ -226,12 +234,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Research workflow state: status, advance, approve.")
     ap.add_argument("--workspace")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("status")
-    adv = sub.add_parser("advance")
+    sub.add_parser("status", parents=[rw_io.ws_parent()])
+    adv = sub.add_parser("advance", parents=[rw_io.ws_parent()])
     adv.add_argument("stage", choices=STAGES)
     adv.add_argument("--reason", default="")
     adv.add_argument("--cause", default="", help="comma-separated IDs (e.g. K-003) that caused the move")
-    apr = sub.add_parser("approve", help="human-only: approve a gate or apply a protocol amendment")
+    apr = sub.add_parser("approve", parents=[rw_io.ws_parent()], help="human-only: approve a gate or apply a protocol amendment")
     apr.add_argument("gate", choices=[*GATES, "amend"])
     apr.add_argument("args", nargs="*", help="G2: H-IDs, G3: X-IDs, amend: amendment file")
     apr.add_argument("--note")

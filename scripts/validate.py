@@ -33,7 +33,8 @@ RULES = [  # (path pattern relative to workspace, schema name, file kind)
     ("report/audit.json", "audit", "json"),
 ]
 ID_FIELD = {"record": "id", "evidence": "id", "observation": "id", "comment": "id",
-            "result": "id", "claim": "id", "run": "run_id"}
+            "result": "id", "claim": "id", "run": "run_id", "search_log_row": "query_id",
+            "screening_row": None}
 SKIP_DIRS = {"data", ".git", ".venv"}
 
 

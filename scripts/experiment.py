@@ -33,6 +33,12 @@ def _git_commit(ws) -> str | None:
 
 def new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds,
                    analysis_plan, baselines=()) -> Path:
+    with rw_io.workspace_lock(ws):
+        return _new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds, analysis_plan, baselines)
+
+
+def _new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds,
+                   analysis_plan, baselines=()) -> Path:
     ws = Path(ws)
     if hypothesis_id not in ids.existing_ids(ws, "H"):
         raise ValueError(f"hypothesis {hypothesis_id} does not exist")
@@ -53,6 +59,11 @@ def new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primar
 
 
 def log_run(ws, xid, status, params=None, metrics=None, code_commit=None, environment=None, notes=None) -> dict:
+    with rw_io.workspace_lock(ws):
+        return _log_run(ws, xid, status, params, metrics, code_commit, environment, notes)
+
+
+def _log_run(ws, xid, status, params=None, metrics=None, code_commit=None, environment=None, notes=None) -> dict:
     ws = Path(ws)
     d = _xdir(ws, xid)
     if xid not in rw_state.load_state(ws)["gates"]["G3"]["approved_ids"]:
@@ -72,6 +83,11 @@ def log_run(ws, xid, status, params=None, metrics=None, code_commit=None, enviro
 
 
 def add_result(ws, xid, run_id, metric, value, split, summary, ci=None) -> dict:
+    with rw_io.workspace_lock(ws):
+        return _add_result(ws, xid, run_id, metric, value, split, summary, ci)
+
+
+def _add_result(ws, xid, run_id, metric, value, split, summary, ci=None) -> dict:
     ws = Path(ws)
     d = _xdir(ws, xid)
     run = next((r for r in rw_io.read_jsonl(d / "runs.jsonl") if r.get("run_id") == run_id), None)
@@ -100,7 +116,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Create experiments and record runs and results.")
     ap.add_argument("--workspace")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    n = sub.add_parser("new")
+    n = sub.add_parser("new", parents=[rw_io.ws_parent()])
     n.add_argument("--hypothesis", required=True)
     n.add_argument("--objective", required=True)
     n.add_argument("--dataset-name", required=True)
@@ -112,7 +128,7 @@ def main(argv=None) -> int:
     n.add_argument("--seed", action="append", type=int, required=True)
     n.add_argument("--plan", required=True)
     n.add_argument("--baseline", action="append", default=[])
-    lr = sub.add_parser("log-run")
+    lr = sub.add_parser("log-run", parents=[rw_io.ws_parent()])
     lr.add_argument("experiment_id")
     lr.add_argument("--status", required=True, choices=RUN_STATUSES)
     lr.add_argument("--params", default="{}", help="JSON object")
@@ -120,7 +136,7 @@ def main(argv=None) -> int:
     lr.add_argument("--commit")
     lr.add_argument("--env")
     lr.add_argument("--notes")
-    ar = sub.add_parser("add-result")
+    ar = sub.add_parser("add-result", parents=[rw_io.ws_parent()])
     ar.add_argument("experiment_id")
     ar.add_argument("--run", required=True)
     ar.add_argument("--metric", required=True)
@@ -128,7 +144,7 @@ def main(argv=None) -> int:
     ar.add_argument("--split", required=True)
     ar.add_argument("--summary", required=True)
     ar.add_argument("--ci", nargs=2, type=float, metavar=("LOW", "HIGH"))
-    dn = sub.add_parser("done")
+    dn = sub.add_parser("done", parents=[rw_io.ws_parent()])
     dn.add_argument("experiment_id")
     a = ap.parse_args(argv)
     ws = rw_io.resolve_workspace(a.workspace)

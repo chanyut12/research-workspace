@@ -17,8 +17,8 @@ Do not run anything. The user approves the spec with `/rw-approve G3 X-…`.
 
 ## Record mode
 From the run logs and output files the user's code produced:
-- `experiment.py log-run X-… --status ok|failed|aborted --params '<json>' --metrics '<json>' --notes "<output file>"` for every run, including failures
-- `experiment.py add-result X-… --run RUN-… --metric <pre-registered metric> --value … --split … --summary … [--ci LOW HIGH]` only from runs with status ok
+- `sh "<scripts_dir>/rw" experiment.py --workspace "<workspace>" log-run X-… --status ok|failed|aborted --params '<json>' --metrics '<json>' --notes "<output file>"` for every run, including failures
+- `sh "<scripts_dir>/rw" experiment.py --workspace "<workspace>" add-result X-… --run RUN-… --metric <pre-registered metric> --value … --split … --summary … [--ci LOW HIGH]` only from runs with status ok
 
 Copy numbers exactly from the output files and name the file in `--notes`.
 

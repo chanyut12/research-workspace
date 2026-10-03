@@ -1,5 +1,6 @@
 # research-workbench
 data/
+rw/.lock
 literature/fulltext/
 experiments/*/outputs/
 meetings/**/transcript.*

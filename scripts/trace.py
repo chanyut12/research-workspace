@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from collections import Counter
@@ -31,6 +32,19 @@ class TraceReport:
 def compute_support_level(cites) -> str:
     kinds = {KIND[c.split("-")[0]] for c in cites if c.split("-")[0] in KIND}
     return kinds.pop() if len(kinds) == 1 else "mixed"
+
+
+def frozen_digest(ws, rel) -> str | None:
+    """Digest of a frozen artifact. Specs ignore `status`, which scripts update after G3."""
+    path = Path(ws) / rel
+    if not path.exists():
+        return None
+    if rel.endswith("spec.yaml"):
+        spec = {k: v for k, v in (rw_io.read_yaml(path) or {}).items() if k != "status"}
+        data = json.dumps(spec, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    else:
+        data = path.read_bytes()
+    return hashlib.sha256(data).hexdigest()
 
 
 def _by_id(rows, key="id") -> dict:
@@ -92,6 +106,13 @@ def check_hypotheses(g, ids=None) -> list[str]:
             continue
         if not h.get("based_on"):
             errors.append(f"{hid}: must cite at least one E/O/R in based_on")
+        for ref in h.get("based_on") or []:
+            if not exists(g, ref):
+                errors.append(f"{hid}: based_on {ref} does not exist")
+            elif ref.startswith("O-") and not g["observations"][ref].get("confirmed_by_user"):
+                errors.append(f"{hid}: based_on {ref} is not confirmed by the user")
+            elif ref.startswith("E-") and g["evidence"][ref].get("verification_status") == "rejected":
+                errors.append(f"{hid}: based_on {ref} is rejected evidence")
         checks = h.get("literature_checks") or []
         if not checks:
             errors.append(f"{hid}: no literature_checks (search for supporting and contradicting work first)")
@@ -121,6 +142,9 @@ def trace(ws) -> TraceReport:
         if ref and not exists(g, ref):
             E.append(f"{owner}: dangling reference {ref}")
 
+    for rel, digest in sorted((g["state"].get("frozen") or {}).items()):
+        if frozen_digest(ws, rel) != digest:
+            E.append(f"{rel} changed after approval (frozen at its gate); restore it or use an amendment / new experiment")
     for sid, s in g["records"].items():
         for q in s.get("query_ids", []):
             need(sid, q)

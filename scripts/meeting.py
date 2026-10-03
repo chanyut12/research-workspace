@@ -18,6 +18,11 @@ SEVERITIES = ("must", "should", "consider")
 
 
 def new_meeting(ws, mtype, date, roles, agenda=None) -> Path:
+    with rw_io.workspace_lock(ws):
+        return _new_meeting(ws, mtype, date, roles, agenda)
+
+
+def _new_meeting(ws, mtype, date, roles, agenda=None) -> Path:
     ws = Path(ws)
     if mtype not in MEETING_TYPES:
         raise ValueError(f"meeting type must be one of {', '.join(MEETING_TYPES)}")
@@ -81,6 +86,11 @@ def attach_transcript(ws, mid, file) -> Path:
 
 
 def add_observation(ws, meeting_id, speaker_role, statement, form, basis, source_ref) -> dict:
+    with rw_io.workspace_lock(ws):
+        return _add_observation(ws, meeting_id, speaker_role, statement, form, basis, source_ref)
+
+
+def _add_observation(ws, meeting_id, speaker_role, statement, form, basis, source_ref) -> dict:
     """Call only after the user confirmed this observation."""
     ws = Path(ws)
     d, m = _load(ws, meeting_id)
@@ -104,6 +114,11 @@ def add_observation(ws, meeting_id, speaker_role, statement, form, basis, source
 
 
 def add_comment(ws, meeting_id, target, text, severity, source_ref) -> dict:
+    with rw_io.workspace_lock(ws):
+        return _add_comment(ws, meeting_id, target, text, severity, source_ref)
+
+
+def _add_comment(ws, meeting_id, target, text, severity, source_ref) -> dict:
     """Call only after the user confirmed this comment."""
     ws = Path(ws)
     meeting_dir(ws, meeting_id)
@@ -132,31 +147,31 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Record meetings, observations (O) and comments (K).")
     ap.add_argument("--workspace")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    n = sub.add_parser("new")
+    n = sub.add_parser("new", parents=[rw_io.ws_parent()])
     n.add_argument("--type", required=True, choices=MEETING_TYPES)
     n.add_argument("--date", default=rw_io.today())
     n.add_argument("--role", action="append", default=[], help="participant role (repeat)")
     n.add_argument("--agenda", action="append", default=[])
-    pq = sub.add_parser("prep")
+    pq = sub.add_parser("prep", parents=[rw_io.ws_parent()])
     pq.add_argument("meeting_id")
     pq.add_argument("--question", action="append", default=[])
-    ao = sub.add_parser("add-observation")
+    ao = sub.add_parser("add-observation", parents=[rw_io.ws_parent()])
     ao.add_argument("meeting_id")
     ao.add_argument("--role", required=True)
     ao.add_argument("--statement", required=True)
     ao.add_argument("--form", required=True, choices=FORMS)
     ao.add_argument("--basis", required=True, choices=BASES)
     ao.add_argument("--ref", required=True, help="where in notes/transcript, e.g. notes.md:5")
-    ac = sub.add_parser("add-comment")
+    ac = sub.add_parser("add-comment", parents=[rw_io.ws_parent()])
     ac.add_argument("meeting_id")
     ac.add_argument("--target", required=True)
     ac.add_argument("--text", required=True)
     ac.add_argument("--severity", required=True, choices=SEVERITIES)
     ac.add_argument("--ref", required=True)
-    at = sub.add_parser("attach-transcript")
+    at = sub.add_parser("attach-transcript", parents=[rw_io.ws_parent()])
     at.add_argument("meeting_id")
     at.add_argument("file")
-    lg = sub.add_parser("logged")
+    lg = sub.add_parser("logged", parents=[rw_io.ws_parent()])
     lg.add_argument("meeting_id")
     a = ap.parse_args(argv)
     ws = rw_io.resolve_workspace(a.workspace)

@@ -1,14 +1,15 @@
 """Shared file I/O and workspace helpers for research-workbench scripts."""
 from __future__ import annotations
 
+import argparse
+import contextlib
 import csv
 import datetime as _dt
+import fcntl
 import json
 import sys
 from pathlib import Path
 from typing import Any, Callable
-
-import yaml
 
 PATHS = {
     "state": "rw/state.json",
@@ -67,6 +68,37 @@ def today() -> str:
     return _dt.date.today().isoformat()
 
 
+@contextlib.contextmanager
+def workspace_lock(ws):
+    """Exclusive lock for "allocate ID + append" sequences, so parallel agents never collide.
+    Not re-entrant: never call a locked function while holding the lock."""
+    p = Path(ws) / "rw" / ".lock"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def ws_parent() -> argparse.ArgumentParser:
+    """Parent parser so --workspace also works after a subcommand."""
+    p = argparse.ArgumentParser(add_help=False)
+    p.add_argument("--workspace", default=argparse.SUPPRESS, help="workspace directory (default: from cwd)")
+    return p
+
+
+def _ensure_trailing_newline(path: Path, newline: str) -> None:
+    if path.exists() and path.stat().st_size > 0:
+        with path.open("rb") as f:
+            f.seek(-1, 2)
+            last = f.read(1)
+        if last not in (b"\n", b"\r"):
+            with path.open("a", encoding="utf-8", newline="") as f:
+                f.write(newline)
+
+
 def read_json(path) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -105,6 +137,7 @@ def write_jsonl(path, rows) -> None:
 def append_jsonl(path, obj) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_trailing_newline(path, "\n")
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
@@ -113,12 +146,14 @@ def read_yaml(path) -> Any:
     path = Path(path)
     if not path.exists():
         return None
+    import yaml  # imported lazily so stdlib-only callers (hooks) work without pyyaml
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 def write_yaml(path, obj) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    import yaml
     path.write_text(yaml.safe_dump(obj, allow_unicode=True, sort_keys=False), encoding="utf-8")
 
 
@@ -134,6 +169,7 @@ def append_csv(path, row: dict, fieldnames: list[str]) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     new = not path.exists() or path.stat().st_size == 0
+    _ensure_trailing_newline(path, "\r\n")
     with path.open("a", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         if new:

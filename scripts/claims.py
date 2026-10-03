@@ -12,6 +12,11 @@ P = rw_io.PATHS
 
 
 def add_claim(ws, text, cites, section=None) -> dict:
+    with rw_io.workspace_lock(ws):
+        return _add_claim(ws, text, cites, section)
+
+
+def _add_claim(ws, text, cites, section=None) -> dict:
     ws = Path(ws)
     cites = [c.strip() for c in cites if c.strip()]
     if not cites:
@@ -38,11 +43,11 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Add or list report claims.")
     ap.add_argument("--workspace")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    ad = sub.add_parser("add")
+    ad = sub.add_parser("add", parents=[rw_io.ws_parent()])
     ad.add_argument("--text", required=True)
     ad.add_argument("--cites", required=True, help="comma-separated E/O/R IDs")
     ad.add_argument("--section")
-    ls = sub.add_parser("list")
+    ls = sub.add_parser("list", parents=[rw_io.ws_parent()])
     ls.add_argument("--section")
     a = ap.parse_args(argv)
     ws = rw_io.resolve_workspace(a.workspace)

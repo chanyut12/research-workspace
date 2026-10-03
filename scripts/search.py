@@ -113,27 +113,33 @@ def run_search(ws, source, query, purpose, for_id="", from_year=None, to_year=No
         dr = (rw_io.read_yaml(ws / P["protocol"]) or {}).get("date_range") or {}
         from_year, to_year = dr.get("from_year"), dr.get("to_year")
     fetch = fetch or net.get_json
-    qid = ids.next_id(ws, "Q")
     url, params, headers = build_request(source, query, from_year, to_year, limit)
-    raw_rel = f"literature/raw/{qid}-{source}.json"
-    row = {"query_id": qid, "purpose": purpose, "for_id": for_id or "", "source": source, "query": query,
+    row = {"purpose": purpose, "for_id": for_id or "", "source": source, "query": query,
            "filters": json.dumps({"from_year": from_year, "to_year": to_year, "limit": limit}),
-           "timestamp": rw_io.now_iso(), "count": 0, "raw_file": raw_rel, "status": "ok"}
+           "timestamp": rw_io.now_iso(), "count": 0, "status": "ok"}
     try:
-        payload = fetch(url, params=params, headers=headers)
+        payload, error = fetch(url, params=params, headers=headers), None
     except net.RetrievalError as e:
-        row.update(status="error", raw_file="")
-        rw_io.append_csv(ws / P["search_log"], row, rw_io.SEARCH_LOG_FIELDS)
-        rw_io.append_jsonl(ws / P["retrieval_errors"], {"query_id": qid, "source": source, "query": query,
-                                                        "error": str(e), "timestamp": row["timestamp"]})
-        raise
-    rw_io.write_json(ws / raw_rel, payload)
-    hits = parse(source, payload)
-    for h in hits:
-        rw_io.append_jsonl(ws / P["candidates"], {**h, "source": source, "query_id": qid,
-                                                  "retrieved_at": row["timestamp"]})
-    row["count"] = len(hits)
-    rw_io.append_csv(ws / P["search_log"], row, rw_io.SEARCH_LOG_FIELDS)
+        payload, error = None, e
+    with rw_io.workspace_lock(ws):  # parallel agents: ID allocation and appends happen atomically
+        qid = ids.next_id(ws, "Q")
+        row["query_id"] = qid
+        if error is not None:
+            row.update(status="error", raw_file="")
+            rw_io.append_csv(ws / P["search_log"], row, rw_io.SEARCH_LOG_FIELDS)
+            rw_io.append_jsonl(ws / P["retrieval_errors"], {"query_id": qid, "source": source, "query": query,
+                                                            "error": str(error), "timestamp": row["timestamp"]})
+        else:
+            row["raw_file"] = f"literature/raw/{qid}-{source}.json"
+            rw_io.write_json(ws / row["raw_file"], payload)
+            hits = parse(source, payload)
+            for h in hits:
+                rw_io.append_jsonl(ws / P["candidates"], {**h, "source": source, "query_id": qid,
+                                                          "retrieved_at": row["timestamp"]})
+            row["count"] = len(hits)
+            rw_io.append_csv(ws / P["search_log"], row, rw_io.SEARCH_LOG_FIELDS)
+    if error is not None:
+        raise error
     return row
 
 

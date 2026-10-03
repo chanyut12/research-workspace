@@ -83,7 +83,11 @@ def _merge_into(rec, cand) -> None:
 
 
 def merge_candidates(ws) -> dict:
-    ws = Path(ws)
+    with rw_io.workspace_lock(ws):  # searches append candidates under the same lock
+        return _merge_candidates(Path(ws))
+
+
+def _merge_candidates(ws: Path) -> dict:
     records = rw_io.read_jsonl(ws / P["records"])
     cands = rw_io.read_jsonl(ws / P["candidates"])
     index = {}

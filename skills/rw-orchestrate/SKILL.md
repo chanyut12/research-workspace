@@ -48,7 +48,7 @@ required_outputs: [<paths>]
 prohibited_actions: [<from the agent's own list, plus anything task-specific>]
 stop_conditions: [retrieval failure, ambiguous source, privacy risk]
 ```
-Run independent tasks in parallel: one discovery-agent per source, evidence-analyst batches of at most 5 papers.
+Run independent tasks in parallel: one discovery-agent per source, evidence-analyst batches of at most 5 papers. Scripts lock the workspace while allocating IDs, but hand-allocated E-IDs (`ids.py next E` then write) can still collide; run `validate.py` after parallel extraction and renumber duplicates.
 Never give one agent planning, retrieval, synthesis and audit together.
 
 ## 4. Check what came back
