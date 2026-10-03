@@ -14,7 +14,7 @@ Claude Code plugin ที่ให้ AI ช่วยทำงานวิจั
    ดังนั้นถึงจะเปิด venv ของ project อื่นอยู่ก็ยังใช้ได้ `/rw-init` จะเช็กให้อีกครั้ง ถ้าหา Python ที่มี deps ไม่เจอ hook ตรวจ artifact จะถูกข้ามแบบเงียบ ๆ
 2. ติดตั้ง plugin ใน Claude Code
    ```
-   /plugin marketplace add <github-user>/research-workbench
+   /plugin marketplace add chanyut12/research-workspace
    /plugin install research-workbench@research-workbench
    ```
    หรือใช้จากโฟลเดอร์ในเครื่อง: `claude --plugin-dir /path/to/research-workbench`
