@@ -30,7 +30,8 @@
         "literature",
         "experimental",
         "expert-opinion",
-        "mixed"
+        "mixed",
+        "exploratory"
       ]
     },
     "section": {

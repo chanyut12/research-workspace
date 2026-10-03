@@ -7,11 +7,6 @@
     "hypothesis_id",
     "objective",
     "dataset",
-    "split",
-    "metrics",
-    "primary_metric",
-    "seeds",
-    "analysis_plan",
     "status"
   ],
   "properties": {
@@ -20,7 +15,10 @@
       "pattern": "^X-\\d{3,}$"
     },
     "hypothesis_id": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^H-\\d{3,}$"
     },
     "objective": {
@@ -87,6 +85,40 @@
         "running",
         "done"
       ]
+    },
+    "kind": {
+      "enum": [
+        "confirmatory",
+        "exploratory"
+      ]
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "const": "exploratory"
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "split",
+          "metrics",
+          "primary_metric",
+          "seeds",
+          "analysis_plan"
+        ],
+        "properties": {
+          "hypothesis_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -31,24 +31,41 @@ def _git_commit(ws) -> str | None:
     return r.stdout.strip() if r.returncode == 0 else None
 
 
-def new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds,
-                   analysis_plan, baselines=()) -> Path:
+KINDS = ("confirmatory", "exploratory")
+
+
+def is_exploratory(spec) -> bool:
+    return (spec or {}).get("kind") == "exploratory"
+
+
+def new_experiment(ws, hypothesis_id, objective, dataset, split=None, metrics=(), primary_metric=None, seeds=(),
+                   analysis_plan=None, baselines=(), kind="confirmatory") -> Path:
     with rw_io.workspace_lock(ws):
-        return _new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds, analysis_plan, baselines)
+        return _new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds,
+                               analysis_plan, baselines, kind)
 
 
 def _new_experiment(ws, hypothesis_id, objective, dataset, split, metrics, primary_metric, seeds,
-                   analysis_plan, baselines=()) -> Path:
+                    analysis_plan, baselines, kind) -> Path:
+    """Confirmatory: pre-registered test of an H, frozen at G3. Exploratory: free data exploration,
+    no hypothesis or gate needed, results can only seed hypotheses or exploratory claims."""
     ws = Path(ws)
-    if hypothesis_id not in ids.existing_ids(ws, "H"):
+    if kind not in KINDS:
+        raise ValueError(f"kind must be one of {', '.join(KINDS)}")
+    if kind == "confirmatory" and not hypothesis_id:
+        raise ValueError("a confirmatory experiment needs --hypothesis H-…; use --kind exploratory for data exploration")
+    if hypothesis_id and hypothesis_id not in ids.existing_ids(ws, "H"):
         raise ValueError(f"hypothesis {hypothesis_id} does not exist")
-    if primary_metric not in metrics:
-        raise ValueError(f"primary metric {primary_metric} must be one of the metrics {metrics}")
+    if kind == "confirmatory" and primary_metric not in (metrics or []):
+        raise ValueError(f"primary metric {primary_metric} must be one of the metrics {list(metrics or [])}")
     xid = ids.next_id(ws, "X")
-    spec = {"id": xid, "hypothesis_id": hypothesis_id, "objective": objective, "dataset": dict(dataset),
-            "split": split, "metrics": list(metrics), "primary_metric": primary_metric,
-            "seeds": [int(s) for s in seeds], "analysis_plan": analysis_plan, "baselines": list(baselines),
-            "status": "draft"}
+    spec = {"id": xid, "kind": kind, "hypothesis_id": hypothesis_id, "objective": objective,
+            "dataset": dict(dataset), "split": split, "metrics": list(metrics or []),
+            "primary_metric": primary_metric, "seeds": [int(s) for s in seeds or []],
+            "analysis_plan": analysis_plan, "baselines": list(baselines or []),
+            "status": "draft" if kind == "confirmatory" else "running"}
+    if kind == "exploratory":  # optional fields: keep only what was given
+        spec = {k: v for k, v in spec.items() if v not in (None, []) or k == "hypothesis_id"}
     problems = validate.validate_object("experiment", spec, f"experiments/{xid}/spec.yaml")
     if problems:
         raise ValueError("; ".join(problems))
@@ -66,7 +83,8 @@ def log_run(ws, xid, status, params=None, metrics=None, code_commit=None, enviro
 def _log_run(ws, xid, status, params=None, metrics=None, code_commit=None, environment=None, notes=None) -> dict:
     ws = Path(ws)
     d = _xdir(ws, xid)
-    if xid not in rw_state.load_state(ws)["gates"]["G3"]["approved_ids"]:
+    if not is_exploratory(rw_io.read_yaml(d / "spec.yaml")) and \
+            xid not in rw_state.load_state(ws)["gates"]["G3"]["approved_ids"]:
         raise ValueError(f"{xid} is not approved at G3; ask the user to run /rw-approve G3 {xid} before running it")
     if status not in RUN_STATUSES:
         raise ValueError(f"status must be one of {', '.join(RUN_STATUSES)}")
@@ -96,7 +114,7 @@ def _add_result(ws, xid, run_id, metric, value, split, summary, ci=None) -> dict
     if run.get("status") != "ok":
         raise ValueError(f"results can only come from runs with status ok ({run_id} is {run.get('status')})")
     spec = rw_io.read_yaml(d / "spec.yaml")
-    if metric not in spec["metrics"]:
+    if not is_exploratory(spec) and metric not in spec["metrics"]:
         raise ValueError(f"{metric} is not in the pre-registered metrics {spec['metrics']} of {xid}")
     res = {"id": ids.next_id(ws, "R"), "experiment_id": xid, "run_id": run_id, "metric": metric,
            "value": float(value), "ci": [float(x) for x in ci] if ci else None, "split": split, "summary": summary}
@@ -117,16 +135,17 @@ def main(argv=None) -> int:
     ap.add_argument("--workspace")
     sub = ap.add_subparsers(dest="cmd", required=True)
     n = sub.add_parser("new", parents=[rw_io.ws_parent()])
-    n.add_argument("--hypothesis", required=True)
+    n.add_argument("--kind", choices=KINDS, default="confirmatory")
+    n.add_argument("--hypothesis", help="required for confirmatory experiments")
     n.add_argument("--objective", required=True)
     n.add_argument("--dataset-name", required=True)
     n.add_argument("--dataset-version", required=True)
     n.add_argument("--dataset-path", required=True)
-    n.add_argument("--split", required=True)
-    n.add_argument("--metric", action="append", required=True)
-    n.add_argument("--primary", required=True)
-    n.add_argument("--seed", action="append", type=int, required=True)
-    n.add_argument("--plan", required=True)
+    n.add_argument("--split")
+    n.add_argument("--metric", action="append", default=[])
+    n.add_argument("--primary")
+    n.add_argument("--seed", action="append", type=int, default=[])
+    n.add_argument("--plan")
     n.add_argument("--baseline", action="append", default=[])
     lr = sub.add_parser("log-run", parents=[rw_io.ws_parent()])
     lr.add_argument("experiment_id")
@@ -151,8 +170,11 @@ def main(argv=None) -> int:
     if a.cmd == "new":
         d = new_experiment(ws, a.hypothesis, a.objective, {"name": a.dataset_name, "version": a.dataset_version,
                                                            "path": a.dataset_path}, a.split, a.metric, a.primary,
-                           a.seed, a.plan, a.baseline)
-        print(f"{d.name} created (draft) — the user approves it with /rw-approve G3 {d.name}")
+                           a.seed, a.plan, a.baseline, a.kind)
+        if a.kind == "exploratory":
+            print(f"{d.name} created (exploratory) — log runs and results right away; no gate needed")
+        else:
+            print(f"{d.name} created (draft) — the user approves it with /rw-approve G3 {d.name}")
     elif a.cmd == "log-run":
         r = log_run(ws, a.experiment_id, a.status, json.loads(a.params), json.loads(a.metrics), a.commit, a.env,
                     a.notes)

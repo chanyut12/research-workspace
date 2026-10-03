@@ -33,3 +33,9 @@ def test_write_progress_no_overwrite(ws):
     with pytest.raises(FileExistsError):
         progress.write_progress(ws, "2026-10-20")
     assert progress.write_progress(ws, "2026-10-20", force=True) == p
+
+
+def test_progress_shows_kind_and_verdict(ws):
+    md = progress.build_progress(ws, "2026-10-20")
+    assert "| H-001 | literature | tested | supported |" in md
+    assert "confirmatory |" in md

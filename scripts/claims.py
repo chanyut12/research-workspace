@@ -27,8 +27,12 @@ def _add_claim(ws, text, cites, section=None) -> dict:
             raise ValueError(f"unknown or invalid citation {c} (claims cite existing E, O or R IDs)")
     if not (text or "").strip():
         raise ValueError("claim text is empty")
+    explo = trace.exploratory_results(trace.load_graph(ws))
+    level = trace.compute_support_level(cites, explo)
+    if level == "mixed" and any(c in explo for c in cites):
+        raise ValueError("exploratory results cannot share a claim with other evidence; write separate claims")
     claim = {"id": ids.next_id(ws, "C"), "text": text.strip(), "cites": cites,
-             "support_level": trace.compute_support_level(cites), "section": section}
+             "support_level": level, "section": section}
     rw_io.append_jsonl(ws / P["claims"], claim)
     return claim
 

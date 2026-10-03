@@ -16,7 +16,10 @@ Create the spec with `sh "<scripts_dir>/rw" experiment.py new --workspace "<work
 Do not run anything. The user approves the spec with `/rw-approve G3 X-…`.
 
 ## Record mode
-From the run logs and output files the user's code produced:
+Experiments are either `confirmatory` (pre-registered, needs G3) or `exploratory` (free, any metric). The packet says which X-ID.
+Find results where the packet points: notebook cell outputs (Read the .ipynb), CSV/JSON files, or logs.
+Never recompute or estimate a number. If a value only appears in a plot, or a notebook was re-run so that it is unclear which output is the real run, stop and ask.
+From those outputs:
 - `sh "<scripts_dir>/rw" experiment.py --workspace "<workspace>" log-run X-… --status ok|failed|aborted --params '<json>' --metrics '<json>' --notes "<output file>"` for every run, including failures
 - `sh "<scripts_dir>/rw" experiment.py --workspace "<workspace>" add-result X-… --run RUN-… --metric <pre-registered metric> --value … --split … --summary … [--ci LOW HIGH]` only from runs with status ok
 

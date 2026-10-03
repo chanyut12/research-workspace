@@ -13,6 +13,7 @@ import rw_io
 
 P = rw_io.PATHS
 KIND = {"E": "literature", "O": "expert-opinion", "R": "experimental"}
+OUTCOMES = ("supported", "refuted", "inconclusive")
 CLAIM_REF = re.compile(r"\[(C-\d{3,})\]")
 TABLE = {"RQ": "rq", "Q": "search_log", "S": "records", "E": "evidence", "M": "meetings",
          "O": "observations", "K": "comments", "H": "hypotheses", "X": "experiments", "R": "results", "C": "claims"}
@@ -29,9 +30,44 @@ class TraceReport:
         return not self.errors
 
 
-def compute_support_level(cites) -> str:
-    kinds = {KIND[c.split("-")[0]] for c in cites if c.split("-")[0] in KIND}
+def compute_support_level(cites, exploratory_r=frozenset()) -> str:
+    kinds = {"exploratory" if c in exploratory_r else KIND[c.split("-")[0]] for c in cites if c.split("-")[0] in KIND}
     return kinds.pop() if len(kinds) == 1 else "mixed"
+
+
+def exploratory_results(g) -> set[str]:
+    return {rid for rid, r in g["results"].items()
+            if g["experiments"].get(r.get("experiment_id"), {}).get("kind") == "exploratory"}
+
+
+def confirmatory_results_for(g, hid) -> list[str]:
+    return sorted(rid for rid, r in g["results"].items()
+                  if (x := g["experiments"].get(r.get("experiment_id"), {})).get("kind") != "exploratory"
+                  and x.get("hypothesis_id") == hid)
+
+
+def check_verdicts(g) -> tuple[list[str], list[str]]:
+    errors, warnings = [], []
+    explo = exploratory_results(g)
+    for hid, h in g["hypotheses"].items():
+        v = h.get("verdict")
+        if h.get("status") == "tested" and not v:
+            errors.append(f"{hid}: status tested but no verdict (record one with hypotheses.py verdict)")
+        if not v and h.get("status") == "approved" and confirmatory_results_for(g, hid):
+            warnings.append(f"{hid}: has results but no verdict yet")
+        if not v:
+            continue
+        for rid in v.get("result_ids", []):
+            if rid not in g["results"]:
+                errors.append(f"{hid}: verdict cites missing result {rid}")
+            elif rid in explo:
+                errors.append(f"{hid}: verdict cites exploratory result {rid}; only confirmatory results can test it")
+            elif rid not in confirmatory_results_for(g, hid):
+                errors.append(f"{hid}: verdict cites {rid}, which is not from an experiment testing {hid}")
+        for ref in v.get("compared_with", []):
+            if not exists(g, ref):
+                errors.append(f"{hid}: verdict compares with missing {ref}")
+    return errors, warnings
 
 
 def frozen_digest(ws, rel) -> str | None:
@@ -180,10 +216,20 @@ def trace(ws) -> TraceReport:
     proposed = [hid for hid, h in g["hypotheses"].items() if h.get("status") == "proposed"]
     W.extend(f"{m} (proposed)" for m in check_hypotheses(g, proposed))
     approved_x = set(g["state"].get("gates", {}).get("G3", {}).get("approved_ids", []))
+    explo_r = exploratory_results(g)
     for xid, x in g["experiments"].items():
         need(xid, x.get("hypothesis_id"))
+        if x.get("kind") == "exploratory":
+            continue
         if g["runs"].get(xid) and xid not in approved_x:
             E.append(f"{xid}: has runs but was never approved at G3")
+        h = g["hypotheses"].get(x.get("hypothesis_id"), {})
+        for ref in h.get("based_on", []):
+            src = g["experiments"].get(g["results"].get(ref, {}).get("experiment_id"), {})
+            if ref in explo_r and src.get("dataset") == x.get("dataset"):
+                W.append(f"{xid}: tests {x.get('hypothesis_id')} on the same data ({x['dataset'].get('name')} "
+                         f"{x['dataset'].get('version')}) that generated it in {src.get('id')}; "
+                         f"use held-out or new data")
     for rid, res in g["results"].items():
         xid = res.get("experiment_id")
         if xid not in g["experiments"]:
@@ -197,8 +243,11 @@ def trace(ws) -> TraceReport:
     for cid, c in g["claims"].items():
         for ref in c.get("cites", []):
             need(cid, ref)
-        expected = compute_support_level(c.get("cites", []))
-        if c.get("support_level") != expected:
+        cites = c.get("cites", [])
+        expected = compute_support_level(cites, explo_r)
+        if expected == "mixed" and any(ref in explo_r for ref in cites):
+            E.append(f"{cid}: mixes exploratory results with other evidence; split it into separate claims")
+        elif c.get("support_level") != expected:
             E.append(f"{cid}: support_level is {c.get('support_level')} but its citations imply {expected}")
     for ref in sorted(set(g["report_claim_refs"])):
         if ref not in g["claims"]:
@@ -208,6 +257,9 @@ def trace(ws) -> TraceReport:
         if unused:
             W.append(f"claims not used in report.md: {', '.join(unused)}")
 
+    v_errors, v_warnings = check_verdicts(g)
+    E.extend(v_errors)
+    W.extend(v_warnings)
     tested = {x.get("hypothesis_id") for x in g["experiments"].values()}
     untested = sorted(h for h, v in g["hypotheses"].items() if v.get("status") == "approved" and h not in tested)
     W.extend(f"{h}: approved but no experiment yet" for h in untested)
@@ -218,6 +270,7 @@ def trace(ws) -> TraceReport:
         "untested_hypotheses": untested,
         "unused_observations": sorted(set(g["observations"]) - used_o),
         "open_comments": sorted(k for k, v in g["comments"].items() if v.get("status") == "open"),
+        "verdicts": {h: v["verdict"]["outcome"] for h, v in sorted(g["hypotheses"].items()) if v.get("verdict")},
         "counts": {k: len(g[k]) for k in ("records", "evidence", "observations", "comments",
                                           "hypotheses", "experiments", "results", "claims")},
     }
@@ -244,6 +297,7 @@ def main(argv=None) -> int:
         print(f"untested hypotheses: {', '.join(s['untested_hypotheses']) or '-'}")
         print(f"unused observations: {', '.join(s['unused_observations']) or '-'}")
         print(f"open comments: {', '.join(s['open_comments']) or '-'}")
+        print("verdicts: " + (", ".join(f"{h}={o}" for h, o in s["verdicts"].items()) or "-"))
         print("OK: evidence chain intact" if r.ok else f"FAIL: {len(r.errors)} error(s)")
     return 0 if r.ok else 1
 

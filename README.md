@@ -36,7 +36,7 @@ Claude Code plugin ที่ให้ AI ช่วยทำงานวิจั
 | `/rw-meeting` | `new` / `prep` / `log` การปรึกษาหมอหรือ review กับอาจารย์ |
 | `/rw-progress` | สร้างเอกสาร progress review สำหรับอาจารย์ |
 | `/rw-synthesize` | สังเคราะห์หลักฐาน + เสนอ hypothesis |
-| `/rw-experiment` | `design` (spec ก่อนรัน) / `record` (run + result) |
+| `/rw-experiment` | `explore` (EDA, ไม่ต้องผ่าน gate) / `design` (spec ก่อนรัน) / `record` (run + result) / `conclude` (สรุป H) |
 | `/rw-audit` | ตรวจ DOI, สายหลักฐาน, comments, claims ก่อน release |
 | `/rw-approve` | **คุณเท่านั้น:** `G1` `G2 [H-…]` `G3 X-…` `G4` `amend <file> --note …` |
 
@@ -57,6 +57,8 @@ R (ผลเดิม/EDA) ───┘    ▲
 | `E-nnn` | evidence พร้อม anchor | `R-nnn` | result |
 | `M-nnn` | meeting | `C-nnn` | claim ในรายงาน |
 | `O-nnn` | observation จากคน | `K-nnn` | comment / action item |
+
+**งานสำรวจกับงานยืนยันแยกกัน:** EDA และการลองโมเดลเร็ว ๆ บันทึกเป็น experiment แบบ `exploratory` ได้ทุกเวลา ใช้เป็นที่มาของ hypothesis ได้ แต่ใช้ยืนยันไม่ได้ hypothesis ทดสอบได้ด้วย experiment แบบ `confirmatory` ที่ผ่าน G3 เท่านั้น แล้วต้องสรุปผลเป็น `supported` / `refuted` / `inconclusive` ก่อนเขียนรายงาน
 
 Gates: **G1** protocol → **G2** hypotheses (ต้องผ่าน literature check) → **G3** experiment spec (ก่อนรัน) → **G4** release (ต้องไม่มี comment `must` ค้าง และ audit ต้องสะอาด)
 

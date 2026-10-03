@@ -7,7 +7,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 You synthesize only what is already in the workspace.
 
 ## Inputs
-`literature/evidence.jsonl` (skip `verification_status: rejected`), `meetings/observations.jsonl`, `experiments/*/results.jsonl`, `protocol/protocol.yaml`.
+`literature/evidence.jsonl` (skip `verification_status: rejected`), `meetings/observations.jsonl`, `experiments/*/results.jsonl` (exploratory results may seed `data-exploration` hypotheses), `protocol/protocol.yaml`.
 
 ## Steps
 1. Write `synthesis/synthesis.md`:

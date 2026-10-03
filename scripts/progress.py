@@ -45,22 +45,25 @@ def build_progress(ws, date: str) -> str:
         out.append("- (ไม่มีรายการใน decision-log)")
     out += ["", "## 2. ผลการทดลอง", ""]
     if g["results"]:
-        out += ["| Result | Experiment | Hypothesis | Metric | Value | CI | Split | Summary |",
-                "|---|---|---|---|---|---|---|---|"]
+        out += ["| Result | Experiment | Hypothesis | Metric | Value | CI | Split | Summary | Kind |",
+                "|---|---|---|---|---|---|---|---|---|"]
         for rid in sorted(g["results"]):
             r = g["results"][rid]
-            hyp = g["experiments"].get(r["experiment_id"], {}).get("hypothesis_id", "-")
+            x = g["experiments"].get(r["experiment_id"], {})
+            hyp = x.get("hypothesis_id") or "-"
             ci = f"[{_fmt(r['ci'][0])}, {_fmt(r['ci'][1])}]" if r.get("ci") else "—"
             out.append("| " + " | ".join(_cell(x) for x in (rid, r["experiment_id"], hyp, r["metric"],
-                                                            _fmt(r["value"]), ci, r["split"], r["summary"])) + " |")
+                                                            _fmt(r["value"]), ci, r["split"], r["summary"],
+                                                            x.get("kind", "confirmatory"))) + " |")
     else:
         out.append("_ยังไม่มีผลการทดลอง_")
     out += ["", "## 3. สถานะ comments", "", comments.render_markdown(list(g["comments"].values())).rstrip()]
     out += ["", "## 4. Hypotheses", ""]
     if g["hypotheses"]:
-        out += ["| ID | Origin | Status | Based on | Statement |", "|---|---|---|---|---|"]
+        out += ["| ID | Origin | Status | Verdict | Based on | Statement |", "|---|---|---|---|---|---|"]
         for hid, h in sorted(g["hypotheses"].items()):
-            out.append("| " + " | ".join(_cell(x) for x in (hid, h.get("origin"), h.get("status"),
+            verdict = (h.get("verdict") or {}).get("outcome", "—")
+            out.append("| " + " | ".join(_cell(x) for x in (hid, h.get("origin"), h.get("status"), verdict,
                                                             ", ".join(h.get("based_on", [])), h.get("statement"))) + " |")
     else:
         out.append("_ยังไม่มี hypothesis_")
@@ -68,6 +71,7 @@ def build_progress(ws, date: str) -> str:
     out += ["", "## 5. ประเด็นค้างที่ควรถามอาจารย์", ""]
     pending = [f"- comment {k} ยังเปิดอยู่: {g['comments'][k]['text']}" for k in rep.summary["open_comments"]]
     pending += [f"- {h} อนุมัติแล้วแต่ยังไม่มี experiment" for h in rep.summary["untested_hypotheses"]]
+    pending += [f"- {w}" for w in rep.warnings if "no verdict" in w or "same data" in w]
     pending += [f"- trace error: {e}" for e in rep.errors]
     out += pending or ["- (ไม่มีประเด็นค้างจาก artifacts)"]
     out += ["", "<!-- rw-progress: เพิ่มคำถาม/decision ที่ต้องการให้อาจารย์ตัดสินด้านล่าง -->", ""]

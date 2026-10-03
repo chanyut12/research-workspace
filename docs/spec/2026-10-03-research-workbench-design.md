@@ -282,3 +282,17 @@ Hooks ทำงานเฉพาะเมื่อ cwd เป็น workspace (
 
 - ปลายทางของงาน stroke คือ thesis, paper หรือรายงานภายใน ซึ่งมีผลต่อ template ของ `report.md` และ `progress-review.md` ใน v0.2
 - GitHub owner/ชื่อ repo สุดท้าย (ตอนนี้ใช้ `research-workbench`)
+
+## 14. v0.2: งานสำรวจและการสรุปผล hypothesis (2026-10-03)
+
+**Exploratory experiments:** `spec.yaml` มี `kind: confirmatory | exploratory` (ไม่ระบุ = confirmatory)
+- exploratory: ไม่ต้องมี hypothesis, ไม่ต้องผ่าน G3, ใช้ metric อะไรก็ได้, รันได้ทุก stage
+- ผลจากงานสำรวจเป็น `based_on` ของ hypothesis ที่มี origin `data-exploration` ได้ แต่ใช้เป็นผลยืนยันใน verdict ไม่ได้
+- claim ที่อ้างผลสำรวจมี `support_level = exploratory` และห้ามรวมกับหลักฐานชนิดอื่นใน claim เดียวกัน
+- `trace` เตือนเมื่อ experiment แบบ confirmatory ทดสอบ hypothesis ด้วย dataset เดียวกับงานสำรวจที่ทำให้เกิด hypothesis นั้น
+
+**Verdict:** hypothesis มี `verdict` = `{outcome: supported|refuted|inconclusive, result_ids, compared_with, rationale, decided_at}`
+- บันทึกด้วย `hypotheses.py verdict` หลังผู้ใช้เห็นด้วย และ `result_ids` ต้องเป็นผลยืนยันจาก experiment ที่ทดสอบ H นั้น
+- H ที่มี verdict มี `status = tested`
+- เข้าขั้น WRITING ไม่ได้ถ้ายังมี H ที่มีผลยืนยันแล้วแต่ไม่มี verdict
+- ผลลบ (refuted/inconclusive) ต้องอยู่ในรายงาน

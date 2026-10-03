@@ -74,6 +74,11 @@ def preconditions(ws, state, target) -> list[str]:
         with_results = {r.get("experiment_id") for r in trace.load_graph(ws)["results"].values()}
         problems += [f"{x}: no results recorded" for x in gates["G3"]["approved_ids"] if x not in with_results]
         problems += validate.validate_workspace(ws)
+    elif target == "WRITING":
+        g = trace.load_graph(ws)
+        problems += [f"{h}: has confirmatory results but no verdict (conclude it with /rw-experiment conclude {h})"
+                     for h, v in sorted(g["hypotheses"].items())
+                     if not v.get("verdict") and trace.confirmatory_results_for(g, h)]
     elif target == "AUDITED":
         problems += trace.trace(ws).errors
         problems += audit.blocking_issues(ws)
@@ -159,6 +164,9 @@ def approve(ws, gate, ids=None, note=None) -> dict:
                 problems.append(f"{xid}: experiments/{xid}/spec.yaml does not exist")
                 continue
             problems += validate.validate_file(spath, ws)
+            if (rw_io.read_yaml(spath) or {}).get("kind") == "exploratory":
+                problems.append(f"{xid}: exploratory experiments need no G3; only confirmatory ones are pre-registered")
+                continue
             hyp = (rw_io.read_yaml(spath) or {}).get("hypothesis_id")
             if hyp not in state["gates"]["G2"]["approved_ids"]:
                 problems.append(f"{xid}: hypothesis {hyp} is not approved at G2")

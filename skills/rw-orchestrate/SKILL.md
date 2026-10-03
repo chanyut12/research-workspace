@@ -28,11 +28,11 @@ Tell the user, in Thai and in 10 lines or fewer:
 | PROTOCOL_APPROVED, LITERATURE | `/rw-search` (scoping), then `/rw-evidence` |
 | SYNTHESIZED | `/rw-synthesize`, a literature check per new hypothesis (`/rw-search`), then the user runs `/rw-approve G2` |
 | HYPOTHESES_APPROVED | `/rw-experiment` design, then the user runs `/rw-approve G3 X-…` |
-| EXPERIMENTING | `/rw-experiment` record |
+| EXPERIMENTING | `/rw-experiment record`, then `/rw-experiment conclude H-…` for each tested hypothesis |
 | RESULTS_VALIDATED, WRITING | the Writing section below, then `/rw-audit` |
 | AUDITED | the user runs `/rw-approve G4` |
 
-Meetings are events, not stages: use `/rw-meeting` and `/rw-progress` at any time.
+Meetings and data exploration are events, not stages: use `/rw-meeting`, `/rw-progress` and `/rw-experiment explore` at any time.
 Address open `must` comments before starting new work, and close each one with `sh "$S/rw" comments.py resolve K-… --status … --changed …`.
 
 ## 3. Dispatch a specialist
@@ -71,6 +71,8 @@ Never run `rw_state.py approve`. Gates belong to the user: `/rw-approve`.
 2. Write `report/report.md` from `sh "$S/rw" claims.py list`. Every factual sentence carries its `[C-xxx]`.
    - Phrase `expert-opinion` claims as opinion ("ผู้เชี่ยวชาญให้ความเห็นว่า…").
    - Phrase `literature` claims at the strength of the study design.
+   - Phrase `exploratory` claims as exploratory findings ("ในการวิเคราะห์เชิงสำรวจพบว่า…"), never as confirmed results.
+   - Report every verdict, including refuted and inconclusive ones.
 3. If a sentence you need has no evidence, do not write it. Tell the user `BLOCKED_BY_EVIDENCE: <what is missing>`.
 4. Then run `/rw-audit`.
 
