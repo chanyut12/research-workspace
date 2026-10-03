@@ -1,0 +1,8 @@
+{
+  "name": "research-workbench",
+  "version": "0.1.0",
+  "description": "Evidence-traceable research workflow for Claude Code: literature review, expert consultations, advisor reviews, ML experiments and audited reports, linked by IDs.",
+  "author": { "name": "Chanyut" },
+  "license": "MIT",
+  "keywords": ["research", "literature-review", "machine-learning", "provenance", "agents"]
+}

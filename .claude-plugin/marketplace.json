@@ -1,0 +1,11 @@
+{
+  "name": "research-workbench",
+  "owner": { "name": "Chanyut" },
+  "plugins": [
+    {
+      "name": "research-workbench",
+      "source": "./",
+      "description": "Evidence-traceable research workflow: literature → expert input → hypotheses → ML experiments → audited report."
+    }
+  ]
+}
