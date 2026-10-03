@@ -1,0 +1,20 @@
+# ตัวอย่างรูปแบบ protocol — /rw-protocol จะสร้าง protocol/protocol.yaml จริงจากการคุยกับคุณ
+protocol_version: 1
+title: "{{TITLE}}"
+research_questions:
+  - id: RQ-1
+    text: "In adults with acute ischemic stroke, which admission features predict poor 90-day functional outcome (mRS 3-6)?"
+review_type: scoping            # scoping | systematic | narrative | rapid
+eligibility:
+  include:
+    - "Adults (>=18) with ischemic stroke"
+    - "Develops or validates a prediction model, or reports a risk factor for functional outcome"
+  exclude:
+    - "Case reports and editorials"
+    - "Paediatric populations"
+sources: [openalex, crossref, semantic_scholar]
+date_range:
+  from_year: 2015
+  to_year: null
+languages: [en]
+notes: null

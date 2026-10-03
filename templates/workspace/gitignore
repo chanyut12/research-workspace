@@ -1,0 +1,7 @@
+# research-workbench
+data/
+literature/fulltext/
+experiments/*/outputs/
+meetings/**/transcript.*
+.venv/
+__pycache__/
