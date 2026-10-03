@@ -60,10 +60,14 @@ R (ผลเดิม/EDA) ───┘    ▲
 
 Gates: **G1** protocol → **G2** hypotheses (ต้องผ่าน literature check) → **G3** experiment spec (ก่อนรัน) → **G4** release (ต้องไม่มี comment `must` ค้าง และ audit ต้องสะอาด)
 
-## ความเป็นส่วนตัว
-- ข้อมูลผู้ป่วยอยู่ใน `data/` ของ workspace เท่านั้น และถูก gitignore
-- PDF (`literature/fulltext/`), outputs ของ experiment และ transcript ก็ถูก gitignore
-- repo นี้ (ตัว tool) ไม่มีข้อมูลวิจัยใด ๆ
+## การจัดการข้อมูล
+- **Tool กับข้อมูลแยกกัน:** repo นี้มีแค่ตัว tool ข้อมูลของงานวิจัยแต่ละชิ้นอยู่ใน workspace ของงานนั้น
+- **ไฟล์ที่ไม่ขึ้น Git โดย default:** `/rw-init` เพิ่มรายการเหล่านี้ใน `.gitignore` ของ workspace ให้
+  - `data/` สำหรับ dataset และข้อมูลที่อาจระบุตัวบุคคลได้
+  - `literature/fulltext/` สำหรับไฟล์ PDF ที่ติดลิขสิทธิ์
+  - `experiments/*/outputs/` สำหรับ output ของการทดลอง
+  - transcript ของการประชุม
+- **ข้อมูลที่ระบุตัวบุคคลได้:** เก็บไว้ใน `data/` เท่านั้น ห้ามคัดลอกลง artifact อื่น ถ้าพบใน notes ระหว่างบันทึก meeting ระบบจะเตือน และไม่บันทึกข้อมูลนั้นลงไป
 
 ## พัฒนา
 ```bash
