@@ -8,7 +8,7 @@ import rw_io
 import rw_state
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "workspace"
-DIRS = ["rw", "protocol/amendments", "literature/raw", "literature/fulltext", "meetings", "synthesis",
+DIRS = ["rw", "protocol/amendments", "literature/raw", "literature/inbox", "literature/fulltext", "meetings", "synthesis",
         "experiments", "progress", "data", "report"]
 MARKER = "research-workbench"
 

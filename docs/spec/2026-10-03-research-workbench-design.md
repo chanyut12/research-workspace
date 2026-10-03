@@ -296,3 +296,18 @@ Hooks ทำงานเฉพาะเมื่อ cwd เป็น workspace (
 - H ที่มี verdict มี `status = tested`
 - เข้าขั้น WRITING ไม่ได้ถ้ายังมี H ที่มีผลยืนยันแล้วแต่ไม่มี verdict
 - ผลลบ (refuted/inconclusive) ต้องอยู่ในรายงาน
+
+## 15. v0.2: นำเข้า paper ที่ผู้ใช้ download เอง (Google Scholar) (2026-10-03)
+
+Google Scholar ไม่มี API และห้ามดึงข้อมูลอัตโนมัติ จึงให้ผู้ใช้ค้นและ download PDF เอง แล้ว `import_papers.py` จัดการต่อ:
+1. รับ PDF จาก `literature/inbox/` (gitignored) และบันทึกคำค้นที่ผู้ใช้ใช้เป็น `Q-xxx` (`source = google_scholar`)
+2. แปลง PDF เป็นข้อความทีละหน้าด้วย pymupdf4llm หรือ pypdf **โดยไม่ให้ AI เขียนใหม่** แล้วเขียนเป็น `.md` ที่มี `<!-- page N -->` ทุกหน้า
+3. ระบุตัวตน paper ตามลำดับ:
+   - DOI หรือ arXiv ID ใน 2 หน้าแรก → Crossref → OpenAlex → DataCite
+   - ถ้าไม่มี → ชื่อเรื่องที่น่าจะเป็น (สูงสุด 4 บรรทัด) → OpenAlex ต้องได้ผลที่ตรงเพียงตัวเดียว ถ้าไม่แน่ใจให้ถามผู้ใช้ผ่าน `--doi FILE=DOI`
+4. รวมเข้า `records.jsonl` (ใช้ dedupe เดิม) แล้วเก็บเป็น `literature/fulltext/<S-ID>.pdf` และ `.md` พร้อม `record.fulltext = {pdf, md, md_source, pages, scanned}`
+5. เขียนแถว screening ขั้น title-abstract เป็น `include` (`reviewer = user`, `USER-SELECTED`) แต่ full-text screening ยังต้องทำตามเกณฑ์
+6. `.md` ที่ผู้ใช้ให้ AI แปลงเองรับได้เฉพาะเมื่อมี PDF ชื่อเดียวกันวางคู่ จะถูกติดป้าย `md_source = user-ai` และหลักฐานทุกชิ้นต้องตรวจกับ PDF
+7. verification-agent ตรวจหลักฐานกับหน้า PDF จริงเสมอ ไม่ใช่กับ `.md`
+
+`verify_doi.py` เช็ก DOI ตามลำดับ Crossref → OpenAlex → DataCite (DataCite ครอบคลุม DOI ของ arXiv และ Zenodo)

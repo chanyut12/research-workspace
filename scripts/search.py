@@ -97,6 +97,14 @@ def parse(source, payload) -> list[dict]:
     return out
 
 
+def parse_datacite(payload) -> dict:
+    """DataCite registers DOIs that Crossref does not (arXiv 10.48550, Zenodo, figshare)."""
+    a = (payload.get("data") or {}).get("attributes") or {}
+    return _hit((a.get("titles") or [{}])[0].get("title"), a.get("publicationYear"), a.get("doi"), {},
+                ((a.get("descriptions") or [{}])[0]).get("description"),
+                [c.get("name") for c in a.get("creators") or [] if c.get("name")], a.get("publisher"), a.get("url"))
+
+
 def run_search(ws, source, query, purpose, for_id="", from_year=None, to_year=None, limit=50, fetch=None) -> dict:
     ws = Path(ws)
     if source not in SOURCES:

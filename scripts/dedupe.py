@@ -84,10 +84,11 @@ def _merge_into(rec, cand) -> None:
 
 def merge_candidates(ws) -> dict:
     with rw_io.workspace_lock(ws):  # searches append candidates under the same lock
-        return _merge_candidates(Path(ws))
+        return _merge_candidates(Path(ws))[0]
 
 
-def _merge_candidates(ws: Path) -> dict:
+def _merge_candidates(ws: Path) -> tuple[dict, list]:
+    """Caller holds the workspace lock. Returns (stats, record ID per candidate or None if skipped)."""
     records = rw_io.read_jsonl(ws / P["records"])
     cands = rw_io.read_jsonl(ws / P["candidates"])
     index = {}
@@ -96,10 +97,12 @@ def _merge_candidates(ws: Path) -> dict:
             index.setdefault(k, r)
     next_n = ids.max_num([r["id"] for r in records]) + 1
     stats = {"new": 0, "merged": 0, "skipped": 0}
+    assigned = []
     now = rw_io.now_iso()
     for cand in cands:
         if not (cand.get("title") or "").strip():
             stats["skipped"] += 1
+            assigned.append(None)
             continue
         rec, key = _find(index, cand)
         if rec is None:
@@ -113,13 +116,14 @@ def _merge_candidates(ws: Path) -> dict:
         for k in keys_for(rec):
             index.setdefault(k, rec)
         stats[action] += 1
+        assigned.append(rec["id"])
         rw_io.append_csv(ws / P["dedupe_log"], {"timestamp": now, "query_id": cand.get("query_id"),
                                                 "title": cand["title"], "action": action, "record_id": rec["id"],
                                                 "key": ":".join(str(x) for x in key)}, rw_io.DEDUPE_LOG_FIELDS)
     if cands:
         rw_io.write_jsonl(ws / P["records"], records)
         rw_io.write_jsonl(ws / P["candidates"], [])  # raw responses stay in literature/raw/
-    return stats
+    return stats, assigned
 
 
 def main(argv=None) -> int:

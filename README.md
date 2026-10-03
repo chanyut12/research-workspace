@@ -8,7 +8,7 @@ Claude Code plugin ที่ให้ AI ช่วยทำงานวิจั
 
 1. สร้าง Python env เฉพาะของ tool (Python ≥ 3.10) ครั้งเดียว
    ```bash
-   python3 -m venv ~/.research-workbench/venv && ~/.research-workbench/venv/bin/pip install pyyaml jsonschema
+   python3 -m venv ~/.research-workbench/venv && ~/.research-workbench/venv/bin/pip install pyyaml jsonschema pypdf
    ```
    scripts ทุกตัวรันผ่าน `scripts/rw` ซึ่งเลือก Python ตามลำดับ `$RW_PYTHON` → `~/.research-workbench/venv` → `.venv` ของ plugin → `python3`
    ดังนั้นถึงจะเปิด venv ของ project อื่นอยู่ก็ยังใช้ได้ `/rw-init` จะเช็กให้อีกครั้ง ถ้าหา Python ที่มี deps ไม่เจอ hook ตรวจ artifact จะถูกข้ามแบบเงียบ ๆ
@@ -31,7 +31,7 @@ Claude Code plugin ที่ให้ AI ช่วยทำงานวิจั
 |---|---|
 | `/rw-orchestrate` | ไม่แน่ใจว่าต้องทำอะไรต่อ หรือต้องการเดินงานต่อ |
 | `/rw-protocol` | ตั้ง RQ, scope, criteria (หรือ amendment หลัง G1) |
-| `/rw-search` | ค้น paper แบบ scoping หรือ literature check ของ hypothesis |
+| `/rw-search` | `import` paper ที่คุณ download จาก Google Scholar (วาง PDF ใน `literature/inbox/`) หรือให้ AI ค้นผ่าน API |
 | `/rw-evidence` | screen paper + ดึงหลักฐานพร้อมหน้า/ตาราง + verify |
 | `/rw-meeting` | `new` / `prep` / `log` การปรึกษาหมอหรือ review กับอาจารย์ |
 | `/rw-progress` | สร้างเอกสาร progress review สำหรับอาจารย์ |
@@ -57,6 +57,12 @@ R (ผลเดิม/EDA) ───┘    ▲
 | `E-nnn` | evidence พร้อม anchor | `R-nnn` | result |
 | `M-nnn` | meeting | `C-nnn` | claim ในรายงาน |
 | `O-nnn` | observation จากคน | `K-nnn` | comment / action item |
+
+**นำเข้า paper จาก Google Scholar:** ค้นใน Scholar ตามปกติ, download PDF ไปวางที่ `literature/inbox/` แล้ว `/rw-search import`
+- ระบบดึงข้อความจาก PDF ตรง ๆ (ไม่ให้ AI เขียนใหม่) เป็น `.md` ที่มีเลขหน้า
+- ระบุตัวตน paper จาก DOI, arXiv ID หรือชื่อเรื่องผ่าน Crossref/OpenAlex/DataCite
+- บันทึกคำค้นไว้ใน search log
+- PDF ต้นฉบับถูกเก็บไว้คู่กัน เพื่อตรวจหลักฐานกับต้นฉบับจริง
 
 **งานสำรวจกับงานยืนยันแยกกัน:** EDA และการลองโมเดลเร็ว ๆ บันทึกเป็น experiment แบบ `exploratory` ได้ทุกเวลา ใช้เป็นที่มาของ hypothesis ได้ แต่ใช้ยืนยันไม่ได้ hypothesis ทดสอบได้ด้วย experiment แบบ `confirmatory` ที่ผ่าน G3 เท่านั้น แล้วต้องสรุปผลเป็น `supported` / `refuted` / `inconclusive` ก่อนเขียนรายงาน
 

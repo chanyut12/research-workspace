@@ -21,6 +21,8 @@ PATHS = {
     "records": "literature/records.jsonl",
     "screening": "literature/screening.csv",
     "evidence": "literature/evidence.jsonl",
+    "inbox": "literature/inbox",
+    "fulltext": "literature/fulltext",
     "retrieval_errors": "literature/retrieval-errors.jsonl",
     "doi_verification": "literature/doi-verification.jsonl",
     "observations": "meetings/observations.jsonl",

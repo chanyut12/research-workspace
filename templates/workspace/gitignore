@@ -2,6 +2,7 @@
 data/
 rw/.lock
 literature/fulltext/
+literature/inbox/
 experiments/*/outputs/
 meetings/**/transcript.*
 .venv/

@@ -44,7 +44,9 @@
         "enum": [
           "openalex",
           "crossref",
-          "semantic_scholar"
+          "semantic_scholar",
+          "google_scholar",
+          "manual"
         ]
       },
       "minItems": 1
@@ -80,6 +82,42 @@
         "string",
         "null"
       ]
+    },
+    "fulltext": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "pdf"
+      ],
+      "properties": {
+        "pdf": {
+          "type": "string"
+        },
+        "md": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "md_source": {
+          "enum": [
+            "extracted",
+            "user-ai",
+            null
+          ]
+        },
+        "pages": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scanned": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

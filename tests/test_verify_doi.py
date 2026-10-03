@@ -54,3 +54,10 @@ def test_verify_workspace(tmp_path):
     assert [r["status"] for r in results] == ["verified", "verified"]
     assert sorted(calls) == ["10.1000/s001", "10.1000/s002"]
     assert len(rw_io.read_jsonl(ws / rw_io.PATHS["doi_verification"])) == 2
+
+
+def test_datacite_doi_verified():
+    from test_import_papers import datacite_only
+    rec = {"id": "S-009", "title": "Attention Is All You Need", "year": 2017, "doi": "10.48550/arxiv.1706.03762"}
+    r = verify_doi.verify_record(rec, fetch=datacite_only)
+    assert r["status"] == "verified" and "DataCite" in r["detail"]

@@ -77,7 +77,9 @@
         "enum": [
           "openalex",
           "crossref",
-          "semantic_scholar"
+          "semantic_scholar",
+          "google_scholar",
+          "manual"
         ]
       },
       "minItems": 1

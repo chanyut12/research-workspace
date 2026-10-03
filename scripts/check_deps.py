@@ -18,6 +18,9 @@ def main() -> int:
               "~/.research-workbench/venv/bin/pip install pyyaml jsonschema")
         return 1
     print(f"OK: dependencies available for {sys.executable}")
+    if importlib.util.find_spec("pypdf") is None and importlib.util.find_spec("pymupdf4llm") is None:
+        print("optional: no PDF reader for /rw-search import — install with: "
+              f"{sys.executable} -m pip install pypdf")
     return 0
 
 

@@ -7,12 +7,14 @@ from pathlib import Path
 
 import net
 import rw_io
+import search
 import trace
 from dedupe import normalize_doi, normalize_title
 
 P = rw_io.PATHS
 CROSSREF_WORK = "https://api.crossref.org/works/"
 OPENALEX_WORK = "https://api.openalex.org/works/doi:"
+DATACITE_DOI = "https://api.datacite.org/dois/"
 FLAG_TYPES = {"retraction", "partial_retraction", "withdrawal", "removal", "expression_of_concern"}
 
 
@@ -55,17 +57,23 @@ def verify_record(record, fetch=None) -> dict:
 
 def _verify_in_openalex(record, doi, base, fetch) -> dict:
     """DOIs registered outside Crossref (DataCite: arXiv, Zenodo, figshare) are 404 there."""
+    quoted = urllib.parse.quote(doi, safe="/()")
     try:
-        work = fetch(OPENALEX_WORK + urllib.parse.quote(doi, safe="/()"), params=None, headers=None)
+        work = fetch(OPENALEX_WORK + quoted, params=None, headers=None)
+        title, year, where = work.get("title") or work.get("display_name") or "", work.get("publication_year"), "OpenAlex"
     except net.NotFound:
-        return {**base, "status": "not-found", "detail": "neither Crossref nor OpenAlex knows this DOI"}
+        try:
+            hit = search.parse_datacite(fetch(DATACITE_DOI + quoted, params=None, headers=None))
+            title, year, where = hit["title"], hit["year"], "DataCite"
+        except net.NotFound:
+            return {**base, "status": "not-found", "detail": "neither Crossref, OpenAlex nor DataCite knows this DOI"}
+        except net.RetrievalError as e:
+            return {**base, "status": "error", "detail": str(e)}
     except net.RetrievalError as e:
         return {**base, "status": "error", "detail": str(e)}
-    message = {"title": [work.get("title") or work.get("display_name") or ""],
-               "issued": {"date-parts": [[work.get("publication_year")]]}}
-    status, detail = compare(record, message)
+    status, detail = compare(record, {"title": [title], "issued": {"date-parts": [[year]]}})
     return {**base, "status": status,
-            "detail": "non-Crossref registrar (found in OpenAlex)" if status == "verified" else detail}
+            "detail": f"non-Crossref registrar (found in {where})" if status == "verified" else detail}
 
 
 def record_ids(ws, scope) -> list[str]:

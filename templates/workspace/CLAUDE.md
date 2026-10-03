@@ -17,7 +17,7 @@
 ## โครงสร้าง
 - `rw/` state + decision log (เขียนผ่าน `rw_state.py` เท่านั้น)
 - `protocol/` RQ, criteria, amendments
-- `literature/` search log, records (S), screening, evidence (E), full text (gitignored)
+- `literature/` search log, records (S), screening, evidence (E); วาง PDF ที่ download มาใน `literature/inbox/` แล้วใช้ `/rw-search import` (full text gitignored)
 - `meetings/` M-xxx (notes), observations (O), comments (K)
 - `synthesis/` synthesis.md, hypotheses (H)
 - `experiments/X-xxx/` spec, runs, results (R)

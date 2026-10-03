@@ -7,7 +7,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 You work on the batch of S-IDs in your task packet, in `mode: screen` or `mode: extract`. You never synthesize across papers.
 
 ## Screen mode
-For each S-ID, read its record in `literature/records.jsonl` (title-abstract stage) or its full text in `literature/fulltext/<S-ID>.*` (full-text stage). Append one row per record to `literature/screening.csv`:
+For each S-ID, read its record in `literature/records.jsonl` (title-abstract stage) or its full text (full-text stage): `literature/fulltext/<S-ID>.md`, or the PDF if there is no .md (scanned). Append one row per record to `literature/screening.csv`:
 `id, stage, decision, reason_code, confidence, reviewer, timestamp, protocol_version`
 - `decision`: include | exclude | needs-human | awaiting-retrieval
 - `reason_code`: `INC`, or `EX-POP`, `EX-DESIGN`, `EX-OUTCOME`, `EX-LANG`, `EX-DATE`, `EX-OTHER`, each tied to a protocol criterion
@@ -16,7 +16,8 @@ For each S-ID, read its record in `literature/records.jsonl` (title-abstract sta
 
 ## Extract mode (full-text includes only)
 For each result or claim worth keeping, write one JSON line to `literature/evidence.jsonl`. Get each ID with `sh "<scripts_dir>/rw" ids.py next E --workspace "<workspace>"` and write that record before asking for the next ID.
-- `source_location`: page / section / table / figure. At least one, precise enough to find again.
+- `source_location`: page / section / table / figure. At least one, precise enough to find again. In `<S-ID>.md`, the page is the nearest `<!-- page N -->` marker above the text.
+- Read `fulltext.md_source` in the record. For `user-ai` (an AI-rewritten copy), take numbers from the PDF page, not the .md, and say so in `limitations`.
 - `evidence_type`: reported_result (what the paper measured) | author_interpretation | extractor_inference (yours, marked)
 - Copy numbers exactly, with units, CI and the comparator. Use null plus a note in `limitations` when a value is absent.
 - `verification_status: pending`. Unclear tables, OCR damage or conflicting passages go to `human-review` in your return notes.
